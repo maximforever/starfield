@@ -1,0 +1,11 @@
+body{
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
+@media handheld, screen and (max-width: 550px) {
+
+
+}
