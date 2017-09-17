@@ -1,11 +1,9 @@
-body{
-    width: 100%;
-    margin: 0;
-    padding: 0;
+body {
+	margin: 0px;
+	padding: 0px;
 }
 
-
-@media handheld, screen and (max-width: 550px) {
-
-
+canvas {
+	width: 100vw;
+	height: 100vh;
 }

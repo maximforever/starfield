@@ -1,117 +1,123 @@
 var canvas = document.getElementById("canvas");
-var ctx;
+var ctx = canvas.getContext('2d');
 
 var stars = [];
-var numStars = 1000;
+var numStars = 500;
 
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
+
+canvas.width =  WIDTH;
+canvas.height =  HEIGHT;
 
 var center = {
     x: WIDTH/2,
     y: HEIGHT/2
 }
 
-var animationSpeed = 10;
+var animationSpeed = 50;
 
-console.log(WIDTH + ", " + HEIGHT);
 
-canvas.width =  WIDTH;
-canvas.height =  HEIGHT;
-
-// SETUP CODE
-
+// SETUP
 
 init();                                                 // launch
 
 function init(){
-    ctx = canvas.getContext("2d");
 
     for(var i = 0; i < numStars; i++){
         createStar();
     }
-
+    console.log(stars);
 
     setInterval(draw, animationSpeed);
 }
 
 
 function draw(){
-    rect(0,0, WIDTH, HEIGHT, "black");
-    circle(WIDTH/2, HEIGHT/2, 2, "red");
-    text("star count: " + stars.length, 100, 50)
+    rect(0 ,0, WIDTH, HEIGHT, "black");
 
+
+    circle(center.x, center.y, 3, "yellow");
 
     for(var i = 0; i < stars.length; i++){
         var star = stars[i];
 
+        /*
+            We want stars that are closer to us (star.z is smaller) to move towards us more quickly. At the same time, we want them to appear bigger.
+            So, star.z affects two measurements - how much the X and Y changes, and how big the star appears.
+            X and Y change by 1/2000th time the distance * 1 for every count of distance (at 10ms refresh - 100 times a second); so 1/20th
+            Size changes from 0.5 to 4
+        */
 
-        var distanceToCenter = Math.sqrt(Math.pow(WIDTH/2-star.x,2) + Math.pow(HEIGHT/2-star.y, 2));
-        var maxDistance = Math.sqrt(Math.pow(WIDTH/2,2) + Math.pow(HEIGHT/2, 2));
+        // make changes to x, y, z, coordinates
+        star.size = 0.2 + 0.01*star.z;                              // a star is always at least 0.2 px in diameter + some fraction of 3.8, based on distance
 
-    //    star.size = distanceToCenter/maxDistance * 3;
+        star.x += (star.x - center.x)/2000 * star.z;                // I'm not sure why /2000 works best.
+        star.y += (star.y - center.y)/2000 * star.z;
+
+        star.z++;
+
+        // draw star
+        circle(star.x, star.y, star.size, "rgba(250, 250, 250, " + (0.2 + 0.008*star.z) + ")");         // I get random star size changes if I move this anywhere else
 
 
-        circle(star.x, star.y, star.size,  "rgba(250, 250, 250, 1");
-    //    circle(star.x, star.y, star.size,  "rgba(250, 250, 250, " + (0.3 + star.size/6) + ")");
-        //line(star.x, star.y, WIDTH/2, HEIGHT/2)
-    //    star.size *= distanceToCenter/600;
 
+        if(star.x > WIDTH || star.x < 0 || star.y > HEIGHT || star.y < 0){
+            star.x = Math.random()* WIDTH;
+            star.y = Math.random()* HEIGHT;
+            star.z = randBetween(1, 20);
+        }
+    
+        
+/*      circle(star.prevCoord.x, star.prevCoord.y, star.size*0.8, "rgba(250, 250, 250, " + (0.2 + 0.008*star.z) + ")");
+        line(star.x, star.y, center.x, center.y)
 
+        var distance = getDistance(star.x, star.y, star.prevCoord.x, star.prevCoord.y);
 
-        /* move star */
+        text((distance + " [" + star.z + "]"), star.x, star.y - 10);
 
-        var deltaX = (star.x - WIDTH/2)/distanceToCenter;
-        var deltaY = (star.y - HEIGHT/2)/distanceToCenter;
+        star.prevCoord.x = star.x;
+        star.prevCoord.y = star.y;*/
 
-        star.y += deltaY;
-        star.x += deltaX;
-     
-        if(star.x < 0 || star.x > WIDTH || star.y < 0 || star.y > HEIGHT){
-
-            var sign = Math.random();
-            if(sign < 0.5){
-                sign = -1;
-            } else {
-                sign = 1
-            }
-
-            star.x = WIDTH/2 + Math.random()*WIDTH*sign/100;
-            star.y = HEIGHT/2 + Math.random()*HEIGHT*sign/100
-/*
-            star.x = WIDTH * Math.random();
-            star.y = HEIGHT * Math.random();*/
-        } 
     }
+
 }
 
+
+
+function createStar(){
+/*  var xCoord = Math.random()* WIDTH;
+    var yCoord = Math.random()* HEIGHT;
+*/
+
+    var xCoord = center.x + (Math.random()-0.5) * WIDTH;
+    var yCoord = center.y +(Math.random()-0.5) * HEIGHT;
+
+
+
+    var zCoord = Math.floor(randBetween(1,50));
+
+    var newStar = new Star(xCoord, yCoord, zCoord);
+
+    stars.push(newStar);    
+}
+
+function Star(x, y, z){
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.size = 1;
+    this.prevCoord = {
+        x: 0,
+        y: 0
+    };
+}
+
+// LIBRARY CODE
 
 function clear() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);                 // creates a rectangle the size of the entire canvas that clears the area
 }
-
-
-// APP CODE
-
-
-function createStar(){
-    var x = Math.random()*WIDTH;
-    var y = Math.random()*HEIGHT;
-
-    var thisStar = new Star(x, y);
-
-    stars.push(thisStar);
-}
-
-
-function Star(x, y){
-    this.x = x;
-    this.y = y;
-    this.size = 1;
-}
-
-
-// LIBRARY CODE
 
 function circle(x,y,r, color) {
     ctx.beginPath();
@@ -133,7 +139,7 @@ function rect(x,y,w,h, color) {
 }
 
 function text(text, x, y){
-    ctx.font = "15px Arial";
+    ctx.font = "12px Arial";
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
     ctx.fillText(text, x, y);
@@ -141,7 +147,7 @@ function text(text, x, y){
 
 function line(x1, y1, x2, y2){
     ctx.beginPath();
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = "rgba(250,250,250, 0.4)";
     ctx.moveTo(x1,y1);
     ctx.lineTo(x2,y2);
     ctx.stroke();
@@ -153,8 +159,7 @@ function randBetween(min, max){
     return Math.random() * (max - min) + min;
 }
 
-
-
-
-
+function getDistance(x1, y1, x2, y2){
+    return Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
+}
 
