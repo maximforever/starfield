@@ -50,20 +50,18 @@ function init(){
 
 
 function draw(){
+
     rect(0 ,0, WIDTH, HEIGHT, "black");             // draw background
 
-    circle(center.x, center.y, 3, "yellow");
+    if(player.hp > 0 ){
+        
 
-    drawStarfield();
-    drawOpponents();
+        circle(center.x, center.y, 3, "yellow");
+
+        drawStarfield();
+        drawOpponents();
 
         /* draw game elements */
-/*
-        if(Math.random() < 0.05){
-            console.log("spawning one!");
-            spawnEnemy();
-        }
-*/
         // draw bullets
 
         for(var j = 0; j < player.bulletCount; j++ ){
@@ -79,9 +77,12 @@ function draw(){
         /* draw health bar */
 
         rect(20, 20, WIDTH - 40, 20, "red");
-        rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "green");
-
-
+        if(player.hp > 0){
+            rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "green");
+        }
+    } else {
+        text("Game Over", center.x-15, center.y-15, 30)
+    }
 }
 
 function drawStarfield(){
@@ -264,8 +265,8 @@ function rect(x,y,w,h, color) {
     ctx.fill();
 }
 
-function text(text, x, y){
-    ctx.font = "12px Arial";
+function text(text, x, y, size){
+    ctx.font =  size + "px Arial";
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
     ctx.fillText(text, x, y);
