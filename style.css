@@ -3,7 +3,12 @@ body {
 	padding: 0px;
 }
 
-canvas {
+#canvas {
 	width: 100vw;
 	height: 100vh;
 }
+
+#canvas:hover {
+	cursor: crosshair;
+}
+
