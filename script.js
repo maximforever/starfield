@@ -12,6 +12,8 @@ var HEIGHT = window.innerHeight;
 canvas.width =  WIDTH;
 canvas.height =  HEIGHT;
 
+var pause = false;
+
 var center = {
     x: WIDTH/2,
     y: HEIGHT/2
@@ -19,6 +21,9 @@ var center = {
 
 var animationSpeed = 50;
 var desiredAnimationSpeed = 50;
+
+
+var queenSpawned = false;
 
 var player = {
     hp: 100, 
@@ -40,6 +45,21 @@ var player = {
         }
     }
 }
+
+
+var enemyData = {
+    pawn: {
+        color: "red",
+        damage: 20,
+        hp: 100
+    },
+    queen: {
+        color: "#8771B6",
+        damage: 35,
+        hp: 200
+    }
+}
+
 
 /* game stats */
 
@@ -78,6 +98,7 @@ function init(){
 function draw(){
 
     if (player.powerUps.hyperspeed.active && player.hp > 0){
+        rect(0 ,0, WIDTH, HEIGHT, "rgb(" + Math.floor(Math.random()*255) + ", "  + Math.floor(Math.random()*255) + ", "  + Math.floor(Math.random()*255));             // draw background
         rect(0 ,0, WIDTH, HEIGHT, "gray");             // draw background
     } else {
         rect(0 ,0, WIDTH, HEIGHT, "black");             // draw background
@@ -107,37 +128,47 @@ function draw(){
                 color = "#6C1F7F"
             }
 
-            circle((30+30*j), HEIGHT - 20, 6, color);
+            circle((30+30*j), HEIGHT - 20, 6, color, true);
 
         }
 
-        if(Math.random() < 0.01){
+        if(Math.random() < 0.01 && !queenSpawned){
                 spawnEnemy();
         }
 
-        if(Math.random() < 0.01){
+        if(Math.random() < 0.005){
                 spawnBonus();
         }
 
         /* draw health bar */
 
         rect(20, 20, WIDTH - 40, 20, "red");
-        if(player.hp > 0){
 
-            if(player.hp > 100){
-                player.hp = 100;
-                player.targetHP = 100;
-            }
 
-            if(player.targetHP < player.hp){
-                player.hp--;
-            } 
 
-            if (player.targetHP > player.hp){
-                player.hp++
-            }
+        if(player.hp > 100){
+            player.hp = 100;
+            player.targetHP = 100;
+        }
 
-            rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "green");
+        if(player.targetHP < player.hp){
+            player.hp--;
+        } 
+
+        if (player.targetHP > player.hp){
+            player.hp++
+        }
+
+        rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "#00D010");
+
+
+        /* draw hyperspeed bar */
+
+        var hyperWidth = (player.powerUps.hyperspeed.expires - Date.now())/1000*20;
+
+        if (hyperWidth > WIDTH - 40) { hyperWidth = WIDTH - 40}
+
+        rect(20,  45, hyperWidth, 5, "black");
 
 
         /* check for bonus expirtion */
@@ -151,10 +182,6 @@ function draw(){
         if(player.powerUps.shield.active && player.powerUps.shield.expires <= Date.now())   { player.powerUps.shield.active = false }
         if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
 
-
-
-
-        }
     } else {
         text("Game Over", center.x-15, center.y-15, 30, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x-15, center.y+30, 15, "red", true)
@@ -202,7 +229,7 @@ function drawStarfield(){
         }
 
 
-        circle(star.x, star.y, star.size, color + (0.2 + 0.008*star.z) + ")");         // I get random star size changes if I move this anywhere else
+        circle(star.x, star.y, star.size, color + (0.2 + 0.008*star.z) + ")", false);         // I get random star size changes if I move this anywhere else
 
         if(star.x > WIDTH || star.x < 0 || star.y > HEIGHT || star.y < 0){
             star.x = Math.random()* WIDTH;
@@ -227,18 +254,30 @@ function drawOpponents(){
 
             // draw enemy
 
-            rect(enemy.x, enemy.y, enemy.size, enemy.size, "red");
+            rect(enemy.x, enemy.y, enemy.size, enemy.size, enemy.color);
 
             // health bar
-            rect(enemy.x, enemy.y-enemy.size/2, enemy.size, enemy.size/5, "red");
-            rect(enemy.x, enemy.y-enemy.size/2, enemy.size * (enemy.hp/100), enemy.size/5, "green");
+            if(enemy.type == "queen"){
+                var fullQueenHP = enemyData.queen.hp;
+                rect(enemy.x, enemy.y-enemy.size/2, enemy.size, enemy.size/5, "red");
+                rect(enemy.x, enemy.y-enemy.size/2, enemy.size * (enemy.hp/fullQueenHP), enemy.size/5, "#00D010");
+            } else {
+                rect(enemy.x, enemy.y-enemy.size/2, enemy.size, enemy.size/5, "red");
+                rect(enemy.x, enemy.y-enemy.size/2, enemy.size * (enemy.hp/100), enemy.size/5, "#00D010");
+            }
+            
 
             if(enemy.x > WIDTH || enemy.x < 0 || enemy.y > HEIGHT || enemy.y < 0){
                 enemy.visible = false;
 
                 if(enemy.hp > 0){
-                    player.targetHP -= 20;                          // this eases the animation
+                    player.targetHP -= enemy.damage;                          // this eases the animation
                     rect(0,0, WIDTH, HEIGHT, "red");
+                    if(enemy.type == "queen") { 
+                        queenSpawned = false;
+                        player.enemiesDefeated++;
+
+                    }
                 }
             }
 
@@ -271,7 +310,7 @@ function drawBonuses(){
                     color = "#DEDE00";
                     break;
                 case "extraBullets":
-                    color = "#0B8B60";
+                    color = "#078CC7";
                     break;
                 case "berserk":
                     color = "#6C1F7F";
@@ -280,7 +319,7 @@ function drawBonuses(){
 
 
             // draw bonus
-            circle(bonus.x, bonus.y, bonus.size, color);         // I get random star size changes if I move this anywhere else
+            circle(bonus.x, bonus.y, bonus.size, color, true);         // I get random star size changes if I move this anywhere else
 
             if(bonus.x > WIDTH || bonus.x < 0 || bonus.y > HEIGHT || bonus.y < 0){
                 bonus.visible = false;
@@ -319,8 +358,16 @@ function spawnEnemy(){
     var xCoord = WIDTH/2 + (Math.random()-0.5)*200;
     var yCoord = HEIGHT/2 + (Math.random()-0.5)*200;
     console.log(xCoord + ", " + yCoord);
-    var newEnemy = new Enemy(xCoord, yCoord);
+
+    var type = "pawn";
+
+    if(player.enemiesDefeated > 0 && player.enemiesDefeated%5 == 0){
+        type = "queen"
+        queenSpawned = true;
+    }
+    var newEnemy = new Enemy(xCoord, yCoord, type);
     enemies.push(newEnemy);    
+    console.log("Spawned " + enemies[enemies.length - 1].type);
 }
 
 function spawnBonus(){
@@ -345,12 +392,15 @@ function Star(x, y, z){
     };
 }
 
-function Enemy(x, y){
+function Enemy(x, y, type){
     this.x = x;
     this.y = y;
     this.z = Math.floor(randBetween(20,50));
     this.size = 1;
-    this.hp = 100;
+    this.type = type
+    this.hp = enemyData[type].hp;
+    this.color = enemyData[type].color;
+    this.damage = enemyData[type].damage
     this.defeated = false;
     this.visible = true;
 }
@@ -388,15 +438,13 @@ function shoot(x, y){
                     if(enemy.hp <= 0){
                         var newBullets = Math.floor(randBetween(3, 8));
                         player.bulletCount += newBullets;
+                        if(player.bulletCount > 20 ) {player.bulletCount = 20}
                         player.enemiesDefeated++;
+                        if(enemy.type == "queen") { queenSpawned = false }
                     }
                 }
-
-
             }
         }
-
-
 
     } else {
         console.log("no bullets!");
@@ -409,8 +457,6 @@ function checkForBonus(x, y){
         if(bonus.visible){
 
             if(getDistance(x, y, bonus.x, bonus.y) <= bonus.size){
-
-                console.log(bonus);
 
                 bonus.visible = false;
 
@@ -460,11 +506,22 @@ function clear() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);                 // creates a rectangle the size of the entire canvas that clears the area
 }
 
-function circle(x,y,r, color) {
+function circle(x,y,r, color, stroke) {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI*2, false);               // start at 0, end at Math.PI*2
     ctx.closePath();
     ctx.fillStyle = color;
+
+    if(stroke){
+        if(player.powerUps.hyperspeed.active){
+            ctx.strokeStyle = "#F9B600";
+        } else {
+            ctx.strokeStyle = "#0197FF";
+        }
+        ctx.lineWidth = 2;
+    }
+
+
     ctx.fill();
 }
 
