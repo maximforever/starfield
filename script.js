@@ -32,14 +32,17 @@ var player = {
     enemiesDefeated: 0,
     powerUps: {
         berserk: {
+            count: 0,
             active: false,
             expires: Date. now()
         },
         shield: {
+            count: 0,
             active: false,
             expires: Date. now()
         },
         hyperspeed: {
+            count: 0,
             active: false,
             expires: Date. now()
         }
@@ -68,8 +71,8 @@ var enemyData = {
 
 var bonusPot = [];
 var berserk = 25;
-var hp = 25;
-var extraBullets = 40;
+var hp = 20;
+var extraBullets = 45;
 var hyperspeed = 10;
 
 for(var i = 0; i < berserk; i++) { bonusPot.push("berserk") }
