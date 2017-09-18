@@ -14,6 +14,8 @@ canvas.height =  HEIGHT;
 
 var pause = false;
 
+var lastX, lastY;
+
 var center = {
     x: WIDTH/2,
     y: HEIGHT/2
@@ -30,6 +32,7 @@ var player = {
     targetHP: 100,                                                  // this eases the animation
     bulletCount: 12,
     enemiesDefeated: 0,
+    level: 1,                                                       // level only goes up when the queen is killed
     powerUps: {
         berserk: {
             count: 0,
@@ -116,6 +119,7 @@ function draw(){
 
         drawStarfield();
         drawStatusWindow();
+        drawBonusWindow();
         drawOpponents();
         drawBonuses();
 
@@ -176,8 +180,6 @@ function draw(){
 
         /* check for bonus expirtion */
 
-
-
         if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
             player.powerUps.hyperspeed.active = false; 
             desiredAnimationSpeed *= 1/2;
@@ -187,7 +189,7 @@ function draw(){
 
     } else {
         text("Game Over", center.x-15, center.y-15, 30, "red", true)
-        text("Enemies killed: " + player.enemiesDefeated, center.x-15, center.y+30, 15, "red", true)
+        text("Enemies killed: " + player.enemiesDefeated, center.x-15, center.y+30, 15, "red", true);
     }
 
 
@@ -278,7 +280,8 @@ function drawOpponents(){
                     rect(0,0, WIDTH, HEIGHT, "red");
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
-                        player.enemiesDefeated++;
+                        player.enemiesDefeated++;                              // if the queen gets through, we still need to go up a level
+                        player.level++; 
 
                     }
                 }
@@ -338,9 +341,25 @@ function drawStatusWindow(){
 
     rect(20, 60, 200, 100, "rgba(230, 230, 230, 0.7)");
     text("Enemies killed: " + player.enemiesDefeated, 30, 85, 15, "black", false);
+    text("Level: " + player.level, 30, 105, 15, "black", false);
 /*    text("Animation speed: " + animationSpeed + "ms", 30, 105, 15, "black", false);
     text("Desired speed: " + desiredAnimationSpeed + "ms", 30, 125, 15, "black", false);*/
     
+}
+
+function drawBonusWindow(){
+
+    rect(20, 180, 200, 100, "rgba(230, 230, 230, 0.7)");
+    text("Berserk", 30, 200, 15, "black", false);
+    for(var i = 0; i < player.powerUps.berserk.count; i++){
+        circle((35+15*i), 215, 5, "#6C1F7F", true);
+    }
+
+    text("Hyperspeed", 30, 240, 15, "black", false);
+    for(var i = 0; i < player.powerUps.hyperspeed.count; i++){
+        circle((35+15*i), 255, 5, "#DEDE00", true);
+    }
+ 
 }
 
 
@@ -420,7 +439,7 @@ function Bonus(x, y, type){
 
 function shoot(x, y){
     if(player.bulletCount > 0){
-        circle(x, y, 10, "red");
+        circle(x, y, 5, "#FFE800");
         player.bulletCount--;
 
         for(var i = 0; i < enemies.length; i++){
@@ -441,9 +460,17 @@ function shoot(x, y){
                     if(enemy.hp <= 0){
                         var newBullets = Math.floor(randBetween(3, 8));
                         player.bulletCount += newBullets;
-                        if(player.bulletCount > 20 ) {player.bulletCount = 20}
+
+                        if(player.bulletCount > 20 ) { player.bulletCount = 20 }
+
+                        if(enemy.type == "queen") { 
+                            queenSpawned = false;
+                            player.bulletCount = 20; 
+                            player.level++;
+                        }
+
                         player.enemiesDefeated++;
-                        if(enemy.type == "queen") { queenSpawned = false }
+
                     }
                 }
             }
@@ -469,20 +496,12 @@ function checkForBonus(x, y){
                     player.bulletCount += 5;
                     if(player.bulletCount > 20) { player.bulletCount = 20 }
                 } else if (bonus.type == "berserk"){
-                    player.powerUps.berserk.active = true;
-                    player.powerUps.berserk.expires = Date.now() + 15000;            // active for 15 seconds
+                    player.powerUps.berserk.count++;                                // active for 15 seconds - stored for later use
                 } else if (bonus.type == "shield"){
                     player.powerUps.berserk.active = true;
-                    player.powerUps.berserk.expires = Date.now() + 15000;            // active for 15 seconds
+                    player.powerUps.berserk.expires = Date.now() + 15000;           // active for 15 seconds - stored for later use
                 } else if (bonus.type == "hyperspeed"){
-                    if(!player.powerUps.hyperspeed.active){
-                        player.powerUps.hyperspeed.active = true;
-                        player.powerUps.hyperspeed.expires = Date.now() + 15000;            // active for 15 seconds
-                        desiredAnimationSpeed *= 2;
-                    } else {
-                        player.powerUps.hyperspeed.expires += 15000;            // active for 15 seconds
-                    }
-                    
+                    player.powerUps.hyperspeed.count++;
                 }
             
                 console.log(bonus.type);
@@ -499,9 +518,56 @@ $("#canvas").on("mousedown", function(e){
     shoot(e.pageX, e.pageY);
 });
 
+$("body").on("keydown", function(e){
+    if(e.which == 32){
+        console.log("space!");
+        shoot(lastX, lastY);
+    }
+
+    /* bonus key events */
+
+    if(e.which == 65 || e.which == 222){         // 83 68 70        75 76 186
+        console.log("berserk!");
+        if(player.powerUps.berserk.count > 0){
+            player.powerUps.berserk.count--;
+            if(player.powerUps.berserk.active){
+                player.powerUps.berserk.expires += 15000;
+            } else {
+                player.powerUps.berserk.active = true;
+                player.powerUps.berserk.expires = Date.now() + 15000;
+            }
+        }
+    }
+
+    if(e.which == 83 || e.which == 186){         //  68 70        75 76 
+        console.log("hyperspeed!");
+        if(player.powerUps.hyperspeed.count > 0){
+            player.powerUps.hyperspeed.count--;
+            if(player.powerUps.hyperspeed.active){
+                player.powerUps.hyperspeed.expires += 15000;
+            } else {
+                player.powerUps.hyperspeed.active = true;
+                player.powerUps.hyperspeed.expires = Date.now() + 15000;
+                desiredAnimationSpeed *= 2;
+            }
+        }
+    }
+
+
+
+
+});
+
 $("#canvas").on("mousemove", function(e){
     checkForBonus(e.pageX, e.pageY);
+    lastX = e.pageX;
+    lastY = e.pageY;
 });
+
+
+
+
+
 
 // LIBRARY CODE
 
