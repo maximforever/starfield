@@ -24,6 +24,21 @@ var center = {
 var animationSpeed = 50;
 var desiredAnimationSpeed = 50;
 
+/* audio */
+
+var zapMP3 = new Audio('assets/zap.mp3');
+var hitMP3 = new Audio('assets/hit1.mp3');
+var hurtMP3 = new Audio('assets/hit2.mp3');
+
+var hpMP3 = new Audio('assets/hp.mp3');
+var berserkMP3 = new Audio('assets/berserk.mp3');
+var bulletsMP3 = new Audio('assets/bullets.mp3');
+var hyperspeedMP3 = new Audio('assets/hyperspeed.mp3');
+var bulletsMP3 = new Audio('assets/bullets.mp3');
+
+var hyperCollectMP3 = new Audio('assets/hyperCollect.mp3');
+var berserkCollectMP3 = new Audio('assets/berserkCollect.mp3');
+
 
 var queenSpawned = false;
 var enemySpawnRate = 0.01;
@@ -239,6 +254,8 @@ function drawOpponents(){
                 enemy.visible = false;
 
                 if(enemy.hp > 0){
+                    hurtMP3.currentTime = 0;
+                    hurtMP3.play();
                     player.targetHP -= enemy.damage;                          // this eases the animation
                     rect(0,0, WIDTH, HEIGHT, "red");
                     if(enemy.type == "queen") { 
@@ -438,7 +455,12 @@ function increaseLevel(){
 function shoot(x, y){
     if(player.bulletCount > 0){
         circle(x, y, 5, "#FFE800");
+
+
+
         player.bulletCount--;
+        zapMP3.currentTime = 0;
+        zapMP3.play();
 
         for(var i = 0; i < enemies.length; i++){
 
@@ -454,6 +476,12 @@ function shoot(x, y){
                     } else {
                         enemy.hp -= 20;
                     }
+
+                    setTimeout(function(){
+                        hitMP3.currentTime = 0;
+                        hitMP3.play();
+                    }, 100)
+                    
                     
                     if(enemy.hp <= 0){
                         var newBullets = Math.floor(randBetween(3, 8));
@@ -491,16 +519,24 @@ function checkForBonus(x, y){
                 bonus.visible = false;
 
                 if(bonus.type == "hp"){
+                    hpMP3.currentTime = 0;
+                    hpMP3.play();
                     player.targetHP += 20;
                 } else if (bonus.type == "extraBullets"){
+                    bulletsMP3.currentTime = 0;
+                    bulletsMP3.play();
                     player.bulletCount += 5;
                     if(player.bulletCount > 20) { player.bulletCount = 20 }
                 } else if (bonus.type == "berserk" && player.powerUps.berserk.count < 10){
+                    berserkCollectMP3.currentTime = 0;
+                    berserkCollectMP3.play();
                     player.powerUps.berserk.count++;                                // active for 15 seconds - stored for later use
                 } else if (bonus.type == "shield" ){
                     player.powerUps.berserk.active = true;
                     player.powerUps.berserk.expires = Date.now() + 15000;           // active for 15 seconds - stored for later use
                 } else if (bonus.type == "hyperspeed" && player.powerUps.hyperspeed.count < 10){
+                    hyperCollectMP3.currentTime = 0;
+                    hyperCollectMP3.play();
                     player.powerUps.hyperspeed.count++;
                 }
             
@@ -567,6 +603,8 @@ $("body").on("keydown", function(e){
             console.log("berserk!");
             if(player.powerUps.berserk.count > 0){
                 player.powerUps.berserk.count--;
+                berserkMP3.currentTime = 0;
+                berserkMP3.play();
                 if(player.powerUps.berserk.active){
                     player.powerUps.berserk.expires += 15000;
                 } else {
@@ -580,6 +618,8 @@ $("body").on("keydown", function(e){
             console.log("hyperspeed!");
             if(player.powerUps.hyperspeed.count > 0){
                 player.powerUps.hyperspeed.count--;
+                hyperspeedMP3.currentTime = 0;
+                hyperspeedMP3.play();
                 if(player.powerUps.hyperspeed.active){
                     player.powerUps.hyperspeed.expires += 15000;
                 } else {
