@@ -26,6 +26,8 @@ var desiredAnimationSpeed = 50;
 
 
 var queenSpawned = false;
+var enemySpawnRate = 0.01;
+var bonusSpawnRate = 0.005;
 
 var player = {
     hp: 100, 
@@ -139,11 +141,11 @@ function draw(){
 
         }
 
-        if(Math.random() < 0.01 && !queenSpawned){
+        if(Math.random() < enemySpawnRate && !queenSpawned){
                 spawnEnemy();
         }
 
-        if(Math.random() < 0.05){
+        if(Math.random() < bonusSpawnRate){
                 spawnBonus();
         }
 
@@ -171,8 +173,8 @@ function draw(){
 
         /* draw hyperspeed and berserker bar */
 
-        var hyperWidth = (player.powerUps.hyperspeed.expires - Date.now())/1000*20;
-        var berserkWidth = (player.powerUps.berserk.expires - Date.now())/1000*20;
+        var hyperWidth = (player.powerUps.hyperspeed.expires - Date.now())/1000*10;
+        var berserkWidth = (player.powerUps.berserk.expires - Date.now())/1000*10;
 
         if (hyperWidth > (WIDTH - 40)/2) { hyperWidth = (WIDTH - 40)/2}
         if (berserkWidth > (WIDTH - 40)/2) { berserkWidth = (WIDTH - 40)/2}
@@ -289,7 +291,7 @@ function drawOpponents(){
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
                         player.enemiesDefeated++;                              // if the queen gets through, we still need to go up a level
-                        player.level++; 
+                        increaseLevel();
 
                     }
                 }
@@ -413,6 +415,15 @@ function spawnBonus(){
 
 }
 
+function increaseLevel(){
+    player.level++;
+    bonusSpawnRate *= 1.1;
+    enemySpawnRate *= 1.1;
+    console.log("new enemy rate: " + enemySpawnRate);
+    console.log("new bonus rate: " + bonusSpawnRate);
+}
+
+
 function Star(x, y, z){
     this.x = x;
     this.y = y;
@@ -476,7 +487,9 @@ function shoot(x, y){
                         if(enemy.type == "queen") { 
                             queenSpawned = false;
                             player.bulletCount = 20; 
-                            player.level++;
+                            increaseLevel();
+                            spawnBonus();
+                            spawnBonus();
                         }
 
                         player.enemiesDefeated++;
@@ -529,7 +542,6 @@ $("#canvas").on("mousedown", function(e){
 
 $("body").on("keydown", function(e){
     if(e.which == 32){
-        console.log("space!");
         shoot(lastX, lastY);
     }
 
