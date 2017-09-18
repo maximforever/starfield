@@ -143,7 +143,7 @@ function draw(){
                 spawnEnemy();
         }
 
-        if(Math.random() < 0.005){
+        if(Math.random() < 0.05){
                 spawnBonus();
         }
 
@@ -169,13 +169,21 @@ function draw(){
         rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "#00D010");
 
 
-        /* draw hyperspeed bar */
+        /* draw hyperspeed and berserker bar */
 
         var hyperWidth = (player.powerUps.hyperspeed.expires - Date.now())/1000*20;
+        var berserkWidth = (player.powerUps.berserk.expires - Date.now())/1000*20;
 
-        if (hyperWidth > WIDTH - 40) { hyperWidth = WIDTH - 40}
+        if (hyperWidth > (WIDTH - 40)/2) { hyperWidth = (WIDTH - 40)/2}
+        if (berserkWidth > (WIDTH - 40)/2) { berserkWidth = (WIDTH - 40)/2}
 
-        rect(20,  45, hyperWidth, 5, "black");
+        if(hyperWidth <= 0){ hyperWidth = 0 }
+        if(berserkWidth <= 0){ berserkWidth = 0 }
+
+        if(player.powerUps.hyperspeed.active){ rect(20,  45, hyperWidth, 5, "black") }
+        if(player.powerUps.berserk.active){ rect((WIDTH - 20 - berserkWidth),  45, berserkWidth, 5, "#6C1F7F") }
+                
+        
 
 
         /* check for bonus expirtion */
@@ -351,11 +359,13 @@ function drawBonusWindow(){
 
     rect(20, 180, 200, 100, "rgba(230, 230, 230, 0.7)");
     text("Berserk", 30, 200, 15, "black", false);
+    text("[A] or [']", 160, 200, 12, "black", false);
     for(var i = 0; i < player.powerUps.berserk.count; i++){
         circle((35+15*i), 215, 5, "#6C1F7F", true);
     }
 
     text("Hyperspeed", 30, 240, 15, "black", false);
+    text("[S] or [;]", 160, 240, 12, "black", false);
     for(var i = 0; i < player.powerUps.hyperspeed.count; i++){
         circle((35+15*i), 255, 5, "#DEDE00", true);
     }
@@ -495,17 +505,16 @@ function checkForBonus(x, y){
                 } else if (bonus.type == "extraBullets"){
                     player.bulletCount += 5;
                     if(player.bulletCount > 20) { player.bulletCount = 20 }
-                } else if (bonus.type == "berserk"){
+                } else if (bonus.type == "berserk" && player.powerUps.berserk.count < 10){
                     player.powerUps.berserk.count++;                                // active for 15 seconds - stored for later use
-                } else if (bonus.type == "shield"){
+                } else if (bonus.type == "shield" ){
                     player.powerUps.berserk.active = true;
                     player.powerUps.berserk.expires = Date.now() + 15000;           // active for 15 seconds - stored for later use
-                } else if (bonus.type == "hyperspeed"){
+                } else if (bonus.type == "hyperspeed" && player.powerUps.hyperspeed.count < 10){
                     player.powerUps.hyperspeed.count++;
                 }
             
                 console.log(bonus.type);
-
             }
         }
     }
