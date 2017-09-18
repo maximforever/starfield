@@ -3,6 +3,7 @@ var ctx = canvas.getContext('2d');
 
 var stars = [];
 var enemies = [];
+var bonuses = [];
 var numStars = 500;
 
 var WIDTH = window.innerWidth;
@@ -17,19 +18,44 @@ var center = {
 }
 
 var animationSpeed = 50;
+var desiredAnimationSpeed = 50;
 
 var player = {
     hp: 100, 
+    targetHP: 100,                                                  // this eases the animation
     bulletCount: 12,
     enemiesDefeated: 0,
     powerUps: {
-        berserk: false,
-        shield: 0,
-        hyperspeed: false
+        berserk: {
+            active: false,
+            expires: Date. now()
+        },
+        shield: {
+            active: false,
+            expires: Date. now()
+        },
+        hyperspeed: {
+            active: false,
+            expires: Date. now()
+        }
     }
 }
 
 /* game stats */
+
+
+/* SET UP BONUSES*/
+
+var bonusPot = [];
+var berserk = 25;
+var hp = 25;
+var extraBullets = 40;
+var hyperspeed = 10;
+
+for(var i = 0; i < berserk; i++) { bonusPot.push("berserk") }
+for(var i = 0; i < hp; i++) { bonusPot.push("hp") }
+for(var i = 0; i < extraBullets; i++) { bonusPot.push("extraBullets") }
+for(var i = 0; i < hyperspeed; i++) { bonusPot.push("hyperspeed") }
 
 
 
@@ -45,28 +71,43 @@ function init(){
     }
     console.log(stars);
 
-    setInterval(draw, animationSpeed);
+    setTimeout(draw, animationSpeed);
 }
 
 
 function draw(){
 
-    rect(0 ,0, WIDTH, HEIGHT, "black");             // draw background
+    if (player.powerUps.hyperspeed.active && player.hp > 0){
+        rect(0 ,0, WIDTH, HEIGHT, "gray");             // draw background
+    } else {
+        rect(0 ,0, WIDTH, HEIGHT, "black");             // draw background
+    }
+    
 
-    if(player.hp > 0 ){
+
+
+    if(player.hp > 0){
         
-
-        circle(center.x, center.y, 3, "yellow");
+    //    circle(center.x, center.y, 3, "yellow");
 
         drawStarfield();
+        drawStatusWindow();
         drawOpponents();
+        drawBonuses();
+
 
         /* draw game elements */
         // draw bullets
 
         for(var j = 0; j < player.bulletCount; j++ ){
 
-            circle((30+30*j), HEIGHT - 20, 6, "red");
+            var color = "red";
+
+            if(player.powerUps.berserk.active){
+                color = "#6C1F7F"
+            }
+
+            circle((30+30*j), HEIGHT - 20, 6, color);
 
         }
 
@@ -74,15 +115,61 @@ function draw(){
                 spawnEnemy();
         }
 
+        if(Math.random() < 0.01){
+                spawnBonus();
+        }
+
         /* draw health bar */
 
         rect(20, 20, WIDTH - 40, 20, "red");
         if(player.hp > 0){
+
+            if(player.hp > 100){
+                player.hp = 100;
+                player.targetHP = 100;
+            }
+
+            if(player.targetHP < player.hp){
+                player.hp--;
+            } 
+
+            if (player.targetHP > player.hp){
+                player.hp++
+            }
+
             rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "green");
+
+
+        /* check for bonus expirtion */
+
+
+
+        if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
+            player.powerUps.hyperspeed.active = false; 
+            desiredAnimationSpeed *= 1/2;
+        }
+        if(player.powerUps.shield.active && player.powerUps.shield.expires <= Date.now())   { player.powerUps.shield.active = false }
+        if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
+
+
+
+
         }
     } else {
-        text("Game Over", center.x-15, center.y-15, 30)
+        text("Game Over", center.x-15, center.y-15, 30, "red", true)
+        text("Enemies killed: " + player.enemiesDefeated, center.x-15, center.y+30, 15, "red", true)
     }
+
+
+
+
+    if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
+    if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
+
+
+    setTimeout(draw, animationSpeed);
+
+
 }
 
 function drawStarfield(){
@@ -107,7 +194,15 @@ function drawStarfield(){
         star.z++;
 
         // draw star
-        circle(star.x, star.y, star.size, "rgba(250, 250, 250, " + (0.2 + 0.008*star.z) + ")");         // I get random star size changes if I move this anywhere else
+
+        var color = "rgba(250, 250, 250, ";
+
+        if(player.powerUps.hyperspeed.active){
+            color = "rgba(20, 20, 20, ";
+        }
+
+
+        circle(star.x, star.y, star.size, color + (0.2 + 0.008*star.z) + ")");         // I get random star size changes if I move this anywhere else
 
         if(star.x > WIDTH || star.x < 0 || star.y > HEIGHT || star.y < 0){
             star.x = Math.random()* WIDTH;
@@ -135,14 +230,14 @@ function drawOpponents(){
             rect(enemy.x, enemy.y, enemy.size, enemy.size, "red");
 
             // health bar
-            rect(enemy.x, enemy.y-20, enemy.size, 10, "red");
-            rect(enemy.x, enemy.y-20, enemy.size*(enemy.hp/100), 10, "green");
+            rect(enemy.x, enemy.y-enemy.size/2, enemy.size, enemy.size/5, "red");
+            rect(enemy.x, enemy.y-enemy.size/2, enemy.size * (enemy.hp/100), enemy.size/5, "green");
 
             if(enemy.x > WIDTH || enemy.x < 0 || enemy.y > HEIGHT || enemy.y < 0){
                 enemy.visible = false;
 
                 if(enemy.hp > 0){
-                    player.hp -= 20;
+                    player.targetHP -= 20;                          // this eases the animation
                     rect(0,0, WIDTH, HEIGHT, "red");
                 }
             }
@@ -151,6 +246,59 @@ function drawOpponents(){
             enemies.splice(i, 1)
         }
     }
+}
+
+function drawBonuses(){
+    for(var i = 0; i < bonuses.length; i++){
+        var bonus = bonuses[i];
+        if(bonus.visible){            
+            // make changes to x, y, z, coordinates
+            bonus.size = 2 + 0.06*bonus.z;                              // a bonus is always at least 0.2 px in diameter + some fraction of 3.8, based on distance
+
+            bonus.x += (bonus.x - center.x)/2000 * bonus.z;                // I'm not sure why /2000 works best.
+            bonus.y += (bonus.y - center.y)/2000 * bonus.z;
+
+            bonus.z++;
+
+
+            var color = "blue";
+
+            switch(bonus.type){
+                case "hp":
+                    color = "#68D73A";
+                    break;
+                case "hyperspeed":
+                    color = "#DEDE00";
+                    break;
+                case "extraBullets":
+                    color = "#0B8B60";
+                    break;
+                case "berserk":
+                    color = "#6C1F7F";
+                    break;
+            }
+
+
+            // draw bonus
+            circle(bonus.x, bonus.y, bonus.size, color);         // I get random star size changes if I move this anywhere else
+
+            if(bonus.x > WIDTH || bonus.x < 0 || bonus.y > HEIGHT || bonus.y < 0){
+                bonus.visible = false;
+            }
+
+        } else {
+            bonuses.splice(i, 1)
+        }
+    }
+}
+
+function drawStatusWindow(){
+
+    rect(20, 60, 200, 100, "rgba(230, 230, 230, 0.7)");
+    text("Enemies killed: " + player.enemiesDefeated, 30, 85, 15, "black", false);
+/*    text("Animation speed: " + animationSpeed + "ms", 30, 105, 15, "black", false);
+    text("Desired speed: " + desiredAnimationSpeed + "ms", 30, 125, 15, "black", false);*/
+    
 }
 
 
@@ -173,7 +321,17 @@ function spawnEnemy(){
     console.log(xCoord + ", " + yCoord);
     var newEnemy = new Enemy(xCoord, yCoord);
     enemies.push(newEnemy);    
-    console.log(enemies);
+}
+
+function spawnBonus(){
+    var xCoord = WIDTH/2 + (Math.random()-0.5)*100;
+    var yCoord = HEIGHT/2 + (Math.random()-0.5)*100;
+    var type = bonusPot[Math.floor(Math.random()*bonusPot.length)];
+    console.log(type);
+    var newBonus = new Bonus(xCoord, yCoord, type);
+    bonuses.push(newBonus);    
+    console.log("spawning bonus");
+
 }
 
 function Star(x, y, z){
@@ -197,28 +355,40 @@ function Enemy(x, y){
     this.visible = true;
 }
 
+function Bonus(x, y, type){
+    this.x = x;
+    this.y = y;
+    this.z = Math.floor(randBetween(10,40));
+    this.size = 1;
+    this.type = type;
+    this.weight = 0;
+    this.visible = true;
+}
+
 function shoot(x, y){
     if(player.bulletCount > 0){
         circle(x, y, 10, "red");
         player.bulletCount--;
 
-
         for(var i = 0; i < enemies.length; i++){
 
             var enemy = enemies[i];
-
             if(enemy.visible){
 
-                console.log(x + ", " + y);
-                console.log(enemy.x  + ", " + (enemy.x + enemy.size));
-                console.log(enemy.y  + ", " + (enemy.y + enemy.size));
-
-                if(x > enemy.x && x < (enemy.x+enemy.size) && y > enemy.y && y < (enemy.y + enemy.size)){
+                if(getDistance(x, y, enemy.x, enemy.y) <= enemy.size){
                     console.log("HIT!");
-                    enemy.hp -= 20;
+                    rect(enemy.x, enemy.y, enemy.size, enemy.size, "yellow")
+
+                    if(player.powerUps.berserk.active){
+                        enemy.hp -= 40;
+                    } else {
+                        enemy.hp -= 20;
+                    }
+                    
                     if(enemy.hp <= 0){
                         var newBullets = Math.floor(randBetween(3, 8));
                         player.bulletCount += newBullets;
+                        player.enemiesDefeated++;
                     }
                 }
 
@@ -233,11 +403,55 @@ function shoot(x, y){
     }
 }
 
+function checkForBonus(x, y){
+    for(var i = 0; i < bonuses.length; i++){
+        var bonus = bonuses[i]
+        if(bonus.visible){
+
+            if(getDistance(x, y, bonus.x, bonus.y) <= bonus.size){
+
+                console.log(bonus);
+
+                bonus.visible = false;
+
+                if(bonus.type == "hp"){
+                    player.targetHP += 20;
+                } else if (bonus.type == "extraBullets"){
+                    player.bulletCount += 5;
+                    if(player.bulletCount > 20) { player.bulletCount = 20 }
+                } else if (bonus.type == "berserk"){
+                    player.powerUps.berserk.active = true;
+                    player.powerUps.berserk.expires = Date.now() + 15000;            // active for 15 seconds
+                } else if (bonus.type == "shield"){
+                    player.powerUps.berserk.active = true;
+                    player.powerUps.berserk.expires = Date.now() + 15000;            // active for 15 seconds
+                } else if (bonus.type == "hyperspeed"){
+                    if(!player.powerUps.hyperspeed.active){
+                        player.powerUps.hyperspeed.active = true;
+                        player.powerUps.hyperspeed.expires = Date.now() + 15000;            // active for 15 seconds
+                        desiredAnimationSpeed *= 2;
+                    } else {
+                        player.powerUps.hyperspeed.expires += 15000;            // active for 15 seconds
+                    }
+                    
+                }
+            
+                console.log(bonus.type);
+
+            }
+        }
+    }
+}
+
 /* LISTENERS */
 
 $("#canvas").on("mousedown", function(e){
-    console.log("[" + e.pageX + ", " + e.pageY + "]");
+//    console.log("[" + e.pageX + ", " + e.pageY + "]");
     shoot(e.pageX, e.pageY);
+});
+
+$("#canvas").on("mousemove", function(e){
+    checkForBonus(e.pageX, e.pageY);
 });
 
 // LIBRARY CODE
@@ -265,10 +479,16 @@ function rect(x,y,w,h, color) {
     ctx.fill();
 }
 
-function text(text, x, y, size){
+function text(text, x, y, size, color, centerAlign){
     ctx.font =  size + "px Arial";
-    ctx.fillStyle = "red";
-    ctx.textAlign = "center";
+    ctx.fillStyle = color;
+
+    if(centerAlign){
+        ctx.textAlign = "center";
+    } else {
+        ctx.textAlign = "left";
+    }
+
     ctx.fillText(text, x, y);
 }
 
