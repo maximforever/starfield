@@ -94,12 +94,16 @@ init();                                                 // launch
 
 function init(){
 
+    pause = true;
+
     for(var i = 0; i < numStars; i++){
         createStar();
     }
     console.log(stars);
 
-    setTimeout(function(){ requestAnimationFrame(draw) } , animationSpeed);
+    setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
+
+    // setTimeout(draw, animationSpeed);
 }
 
 
@@ -123,83 +127,27 @@ function draw(){
     //    circle(center.x, center.y, 3, "yellow");
 
         drawStarfield();
-        drawStatusWindow();
-        drawBonusWindow();
         drawOpponents();
         drawBonuses();
+        drawBullets();
+        drawHealthBar();
+       
+        if(!pause){
+            
+            drawStatusWindow();
+            drawBonusWindow();
 
+            /* check for bonus expirtion */
 
-        /* draw game elements */
-        // draw bullets
-
-        for(var j = 0; j < player.bulletCount; j++ ){
-
-            var color = "red";
-
-            if(player.powerUps.berserk.active){
-                color = "#6C1F7F"
+            if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
+                player.powerUps.hyperspeed.active = false; 
+                desiredAnimationSpeed *= 1/2;
             }
-
-            circle((30+30*j), HEIGHT - 20, 6, color, true);
+            if(player.powerUps.shield.active && player.powerUps.shield.expires <= Date.now())   { player.powerUps.shield.active = false }
+            if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
 
         }
-
-        if(Math.random() < enemySpawnRate && !queenSpawned){
-                spawnEnemy();
-        }
-
-        if(Math.random() < bonusSpawnRate){
-                spawnBonus();
-        }
-
-        /* draw health bar */
-
-        rect(20, 20, WIDTH - 40, 20, "red");
-
-
-
-        if(player.hp > 100){
-            player.hp = 100;
-            player.targetHP = 100;
-        }
-
-        if(player.targetHP < player.hp){
-            player.hp--;
-        } 
-
-        if (player.targetHP > player.hp){
-            player.hp++
-        }
-
-        rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "#00D010");
-
-
-        /* draw hyperspeed and berserker bar */
-
-        var hyperWidth = (player.powerUps.hyperspeed.expires - Date.now())/1000*10;
-        var berserkWidth = (player.powerUps.berserk.expires - Date.now())/1000*10;
-
-        if (hyperWidth > (WIDTH - 40)/2) { hyperWidth = (WIDTH - 40)/2}
-        if (berserkWidth > (WIDTH - 40)/2) { berserkWidth = (WIDTH - 40)/2}
-
-        if(hyperWidth <= 0){ hyperWidth = 0 }
-        if(berserkWidth <= 0){ berserkWidth = 0 }
-
-        if(player.powerUps.hyperspeed.active){ rect(20,  45, hyperWidth, 5, "black") }
-        if(player.powerUps.berserk.active){ rect((WIDTH - 20 - berserkWidth),  45, berserkWidth, 5, "#6C1F7F") }
-                
         
-
-
-        /* check for bonus expirtion */
-
-        if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
-            player.powerUps.hyperspeed.active = false; 
-            desiredAnimationSpeed *= 1/2;
-        }
-        if(player.powerUps.shield.active && player.powerUps.shield.expires <= Date.now())   { player.powerUps.shield.active = false }
-        if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
-
     } else {
         text("Game Over", center.x-15, center.y-15, 30, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x-15, center.y+30, 15, "red", true);
@@ -211,12 +159,15 @@ function draw(){
     if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
     if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
 
-    setTimeout(function(){ requestAnimationFrame(draw) } , animationSpeed);
-
+    if(!pause){
+        setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
+    }
+    
 }
 
+/* DRAWING FUNCTIONS */
+
 function drawStarfield(){
-    /* draw starfield*/
 
     for(var i = 0; i < stars.length; i++){
         var star = stars[i];
@@ -349,25 +300,82 @@ function drawBonuses(){
     }
 }
 
+function drawBullets(){
+    for(var j = 0; j < player.bulletCount; j++ ){
+
+        var color = "red";
+
+        if(player.powerUps.berserk.active){
+            color = "#6C1F7F"
+        }
+
+        circle((30+30*j), HEIGHT - 20, 6, color, true);
+
+    }
+
+    if(Math.random() < enemySpawnRate && !queenSpawned){
+            spawnEnemy();
+    }
+
+    if(Math.random() < bonusSpawnRate){
+            spawnBonus();
+    }
+}
+
+function drawHealthBar(){
+    rect(20, 20, WIDTH - 40, 20, "red");
+
+    if(player.hp > 100){
+        player.hp = 100;
+        player.targetHP = 100;
+    }
+
+    if(player.targetHP < player.hp){
+        player.hp--;
+    } 
+
+    if (player.targetHP > player.hp){
+        player.hp++
+    }
+
+    rect(20, 20, (WIDTH - 40)*(player.hp/100), 20, "#00D010");
+
+
+    /* draw hyperspeed and berserker bar */
+
+    var hyperWidth = (player.powerUps.hyperspeed.expires - Date.now())/1000*10;
+    var berserkWidth = (player.powerUps.berserk.expires - Date.now())/1000*10;
+
+    if (hyperWidth > (WIDTH - 40)/2) { hyperWidth = (WIDTH - 40)/2}
+    if (berserkWidth > (WIDTH - 40)/2) { berserkWidth = (WIDTH - 40)/2}
+
+    if(hyperWidth <= 0){ hyperWidth = 0 }
+    if(berserkWidth <= 0){ berserkWidth = 0 }
+
+    if(player.powerUps.hyperspeed.active){ rect(20,  45, hyperWidth, 5, "black") }
+    if(player.powerUps.berserk.active){ rect((WIDTH - 20 - berserkWidth),  45, berserkWidth, 5, "#6C1F7F") }  
+
+}
+
 function drawStatusWindow(){
 
     rect(20, 60, 200, 100, "rgba(230, 230, 230, 0.7)");
-    text("Enemies killed: " + player.enemiesDefeated, 30, 85, 15, "black", false);
-    text("Level: " + player.level, 30, 105, 15, "black", false);
+    text("Enemies killed: " + player.enemiesDefeated, 30, 85, 18, "black", false);
+    text("Level: " + player.level, 30, 105, 18, "black", false);
 
 }
 
 function drawBonusWindow(){
 
     rect(20, 180, 200, 100, "rgba(230, 230, 230, 0.7)");
-    text("Berserk", 30, 200, 15, "black", false);
-    text("[A] or [']", 160, 200, 12, "black", false);
+    text("Berserk", 30, 200, 18, "black", false);
+    text("[A] or [']", 160, 200, 15, "black", false);
     for(var i = 0; i < player.powerUps.berserk.count; i++){
         circle((35+15*i), 215, 5, "#6C1F7F", true);
     }
 
-    text("Hyperspeed", 30, 240, 15, "black", false);
-    text("[S] or [;]", 160, 240, 12, "black", false);
+    text("Hyperspeed", 30, 240, 18, "black", false);
+    text("[S] or [;]", 160, 240, 15, "black", false);
     for(var i = 0; i < player.powerUps.hyperspeed.count; i++){
         circle((35+15*i), 255, 5, "#DEDE00", true);
     }
@@ -413,6 +421,9 @@ function spawnBonus(){
 
 }
 
+
+/* GAME FUNCTIONS */
+
 function increaseLevel(){
     player.level++;
     bonusSpawnRate *= 1.1;
@@ -422,39 +433,7 @@ function increaseLevel(){
 }
 
 
-function Star(x, y, z){
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.size = 1;
-    this.prevCoord = {
-        x: 0,
-        y: 0
-    };
-}
 
-function Enemy(x, y, type){
-    this.x = x;
-    this.y = y;
-    this.z = Math.floor(randBetween(20,50));
-    this.size = 1;
-    this.type = type
-    this.hp = enemyData[type].hp;
-    this.color = enemyData[type].color;
-    this.damage = enemyData[type].damage
-    this.defeated = false;
-    this.visible = true;
-}
-
-function Bonus(x, y, type){
-    this.x = x;
-    this.y = y;
-    this.z = Math.floor(randBetween(10,40));
-    this.size = 1;
-    this.type = type;
-    this.weight = 0;
-    this.visible = true;
-}
 
 function shoot(x, y){
     if(player.bulletCount > 0){
@@ -468,7 +447,7 @@ function shoot(x, y){
 
                 if(getDistance(x, y, enemy.x, enemy.y) <= enemy.size){
                     console.log("HIT!");
-                    rect(enemy.x, enemy.y, enemy.size, enemy.size, "yellow")
+                    rect(enemy.x, enemy.y, enemy.size, enemy.size, "yellow");
 
                     if(player.powerUps.berserk.active){
                         enemy.hp -= 40;
@@ -531,49 +510,98 @@ function checkForBonus(x, y){
     }
 }
 
+
+
+/* OBJECT CONSTRUCTORS */
+
+
+function Star(x, y, z){
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.size = 1;
+    this.prevCoord = {
+        x: 0,
+        y: 0
+    };
+}
+
+function Enemy(x, y, type){
+    this.x = x;
+    this.y = y;
+    this.z = Math.floor(randBetween(20,50));
+    this.size = 1;
+    this.type = type
+    this.hp = enemyData[type].hp;
+    this.color = enemyData[type].color;
+    this.damage = enemyData[type].damage
+    this.defeated = false;
+    this.visible = true;
+}
+
+function Bonus(x, y, type){
+    this.x = x;
+    this.y = y;
+    this.z = Math.floor(randBetween(10,40));
+    this.size = 1;
+    this.type = type;
+    this.weight = 0;
+    this.visible = true;
+}
+
 /* LISTENERS */
 
 $("#canvas").on("mousedown", function(e){
 //    console.log("[" + e.pageX + ", " + e.pageY + "]");
-    shoot(e.pageX, e.pageY);
+    if(!pause){ shoot(e.pageX, e.pageY) }
 });
 
 $("body").on("keydown", function(e){
     if(e.which == 32){
-        shoot(lastX, lastY);
+        if(!pause){ shoot(lastX, lastY) }
     }
 
     /* bonus key events */
+    if(!pause){
+        if(e.which == 65 || e.which == 222){         // 83 68 70        75 76 186
+            console.log("berserk!");
+            if(player.powerUps.berserk.count > 0){
+                player.powerUps.berserk.count--;
+                if(player.powerUps.berserk.active){
+                    player.powerUps.berserk.expires += 15000;
+                } else {
+                    player.powerUps.berserk.active = true;
+                    player.powerUps.berserk.expires = Date.now() + 15000;
+                }
+            }
+        }
 
-    if(e.which == 65 || e.which == 222){         // 83 68 70        75 76 186
-        console.log("berserk!");
-        if(player.powerUps.berserk.count > 0){
-            player.powerUps.berserk.count--;
-            if(player.powerUps.berserk.active){
-                player.powerUps.berserk.expires += 15000;
-            } else {
-                player.powerUps.berserk.active = true;
-                player.powerUps.berserk.expires = Date.now() + 15000;
+        if(e.which == 83 || e.which == 186){         //  68 70        75 76 
+            console.log("hyperspeed!");
+            if(player.powerUps.hyperspeed.count > 0){
+                player.powerUps.hyperspeed.count--;
+                if(player.powerUps.hyperspeed.active){
+                    player.powerUps.hyperspeed.expires += 15000;
+                } else {
+                    player.powerUps.hyperspeed.active = true;
+                    player.powerUps.hyperspeed.expires = Date.now() + 15000;
+                    desiredAnimationSpeed *= 2;
+                }
             }
         }
     }
 
-    if(e.which == 83 || e.which == 186){         //  68 70        75 76 
-        console.log("hyperspeed!");
-        if(player.powerUps.hyperspeed.count > 0){
-            player.powerUps.hyperspeed.count--;
-            if(player.powerUps.hyperspeed.active){
-                player.powerUps.hyperspeed.expires += 15000;
-            } else {
-                player.powerUps.hyperspeed.active = true;
-                player.powerUps.hyperspeed.expires = Date.now() + 15000;
-                desiredAnimationSpeed *= 2;
-            }
+    if(e.which == 80){
+        console.log(pause);
+        if(pause){
+            pause = false;
+            $("#intro").hide();
+            draw();
+        } else {
+            $("#intro").show();
+            pause = true;
         }
-    }
-
-
-
+    } 
 
 });
 
@@ -581,6 +609,12 @@ $("#canvas").on("mousemove", function(e){
     checkForBonus(e.pageX, e.pageY);
     lastX = e.pageX;
     lastY = e.pageY;
+});
+
+$("#start").on("click", function(){
+    pause = false;
+    $("#intro").hide();
+    draw();
 });
 
 
@@ -625,7 +659,7 @@ function rect(x,y,w,h, color) {
 }
 
 function text(text, x, y, size, color, centerAlign){
-    ctx.font =  size + "px Arial";
+    ctx.font =  size + "px Rajdhani";
     ctx.fillStyle = color;
 
     if(centerAlign){

@@ -2,12 +2,61 @@
 <html>
 <head>
     <title>Starfield</title>
+    <link href="https://fonts.googleapis.com/css?family=Rajdhani:500,700" rel="stylesheet">
     <link href = "style.css" type = "text/css" rel = "stylesheet">
 </head>
 
 <body>
 
     <canvas id = "canvas"></canvas>
+
+    <div id = "intro">
+        <div id = "description">
+            <div class = "game-intro">
+                    Get ready shoot up some evil space squares! They stumbled into your corner of the cosmos, and they're not getting out alive. Every enemy that makes it past your guard costs you some health, and watch out - among their ranks are vicious Queen squares ready to take a chomp out of your spacesuit. 
+            </div>
+            <div id = "controls">
+                <div class = "control-column">
+                    <span class = "key">SPACE</span> or <span class = "key">Left Click</span> to shoot<br>
+                    <span class = "key">P</span> to pause the game<br>
+                </div><!-- 
+                 --><div class = "control-column">
+                    <span class = "key">A</span> or <span class = "key">'</span> to use <span class = "bold">berserk</span><br>
+                    <span class = "key">S</span> or <span class = "key">;</span> to use <span class = "bold">hyperspeed</span><br>
+                </div>
+            </div>
+            <div class = "game-intro">
+                Fortunately, you'll have some help from floating space debris along the way. Some power-ups are applied instantly (<span class = "bold">extra bullets</span> and <span class = "bold">HP</span>), but others (<span class = "bold">hyperspeed</span> and <span class = "bold">berserk</span>) are stored for whenever you're ready to use them. Specifically, look out for these:
+            </div>
+            <div id = "bonuses">
+                <div class = "bonus-tile">
+                    <div class = "bonus-pic"><div class = "bonus-pic-div" id = "bullets"></div></div>
+                    <div class = "description">
+                        <p><span class = "bold">Extra bullets</span>: your spacesuit holds up to 20 total</p>
+                    </div>
+                </div><!-- 
+             --><div class = "bonus-tile">
+                    <div class = "bonus-pic"><div class = "bonus-pic-div" id = "berserk"></div></div>
+                    <div class = "description">
+                        <p><span class = "bold">Berserk</span>: for 15 seconds your bullets deal double damage</p>
+                    </div>
+                </div><!-- 
+             --><div class = "bonus-tile">
+                    <div class = "bonus-pic"><div class = "bonus-pic-div" id = "hp"></div></div>
+                    <div class = "description">
+                        <p><span class = "bold">HP</span>: just floatin' out there in space</p>
+                    </div>
+                </div><!-- 
+             --><div class = "bonus-tile">
+                    <div class = "bonus-pic"><div class = "bonus-pic-div" id = "hyperspeed"></div></div>
+                    <div class = "description">
+                        <p><span class = "bold">Hyperspeed</span>: for 15 seconds, you go fast, everything else goes slow</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button id = "start">Play</button>
+    </div>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src = "script.js"></script>

@@ -4,18 +4,139 @@ body {
     height: 100%;
     width: 100%;
     overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #canvas {
 	width: 100vw;
 	height: 100vh;
-	z-index: 0;
+	z-index: 1;
 }
 
 #canvas:hover {
 	cursor: crosshair;
 }
 
-#pause {
-	z-index: 1
+#intro {
+    width: 800px;
+    background: rgba(40, 40, 40, 0.8);
+	z-index: 2;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #DEEEDB;
+    box-shadow: 0px 0px 45px rgba(128, 128, 128, 0.75);
+    border-radius: 15px;  
+
+}
+
+#description {
+    width: calc(100% - 20px);
+    padding: 10px;
+    height: 75%;
+}
+
+#start {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    border: 2px solid white;
+    margin: 10px;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    text-transform: uppercase;
+    font-size: 2.5em;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#start:hover {
+    background-color: #F1F1F1;
+    border: 2px solid black;
+    color: black;
+}
+
+#bonuses {
+    width: calc(100% - 10px);
+    padding: 15px 5px 5px 5px;
+    background: rgba(20, 20, 20, 0.8);
+    color: white;
+}
+
+.bonus-tile {
+    display: inline-block;
+    width: calc(25% - 10px);
+    vertical-align: top;
+    text-align: center;
+    padding: 0px 5px;
+}
+
+.bonus-pic{
+    background: rgba(20, 20, 20, 0.6);
+    text-align: center; 
+    padding: 7.5px;
+    border: 1px solid gray;
+    box-shadow: 0px 0px 3px gray;
+}
+
+.bonus-pic-div {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#hp {
+    background: #68D73A;
+}
+
+#hyperspeed {
+    background: #DEDE00;
+}
+
+#berserk {
+    background: #6C1F7F;
+}
+
+#bullets {
+    background: #078CC7;
+}
+
+.game-intro {
+    padding: 0px 10px 10px 10px;
+    font-size: 1.1em;
+    line-height: 1.3em;
+}
+ 
+#controls {
+    background: rgba(220, 240, 149, 0.7);
+    padding: 5px;
+    width: 80%;
+    color: black;
+    border-radius: 10px;
+    margin: 10px auto;
+}
+
+.control-column {
+    display: inline-block;
+    width: calc(40% - 10px);
+    margin-left: 10%;
+    padding: 0px 5px;
+    line-height: 2em;
+}
+
+.key {
+    background-color: #CEC4A6;
+    padding: 3px;
+    color: black;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+
+.bold {
+    font-weight: bold;
 }
