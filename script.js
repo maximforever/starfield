@@ -31,7 +31,7 @@ var bonusSpawnRate = 0.005;
 
 var player = {
     hp: 100, 
-    targetHP: 100,                                                  // this eases the animation
+    targetHP: 100,                                                  // this slows down the animation, allowing the player to see HP change
     bulletCount: 12,
     enemiesDefeated: 0,
     level: 1,                                                       // level only goes up when the queen is killed
@@ -99,11 +99,14 @@ function init(){
     }
     console.log(stars);
 
-    setTimeout(draw, animationSpeed);
+    setTimeout(function(){ requestAnimationFrame(draw) } , animationSpeed);
 }
 
 
 function draw(){
+
+    clear();
+
 
     if (player.powerUps.hyperspeed.active && player.hp > 0){
         rect(0 ,0, WIDTH, HEIGHT, "rgb(" + Math.floor(Math.random()*255) + ", "  + Math.floor(Math.random()*255) + ", "  + Math.floor(Math.random()*255));             // draw background
@@ -208,9 +211,7 @@ function draw(){
     if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
     if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
 
-
-    setTimeout(draw, animationSpeed);
-
+    setTimeout(function(){ requestAnimationFrame(draw) } , animationSpeed);
 
 }
 
@@ -261,7 +262,8 @@ function drawOpponents(){
             // make changes to x, y, z, coordinates
             enemy.size = 3 + 0.2*enemy.z;                              // a star is always at least 0.2 px in diameter + some fraction of 3.8, based on distance
 
-            enemy.x += (enemy.x - center.x)/4000 * enemy.z;                
+            enemy.x += (enemy.x - center.x)/4000 * enemy.z; 
+            enemy.y += (enemy.y - center.y)/4000 * enemy.z;                
 
             // health bar
 
@@ -352,9 +354,7 @@ function drawStatusWindow(){
     rect(20, 60, 200, 100, "rgba(230, 230, 230, 0.7)");
     text("Enemies killed: " + player.enemiesDefeated, 30, 85, 15, "black", false);
     text("Level: " + player.level, 30, 105, 15, "black", false);
-/*    text("Animation speed: " + animationSpeed + "ms", 30, 105, 15, "black", false);
-    text("Desired speed: " + desiredAnimationSpeed + "ms", 30, 125, 15, "black", false);*/
-    
+
 }
 
 function drawBonusWindow(){
@@ -391,7 +391,6 @@ function createStar(){
 function spawnEnemy(){
     var xCoord = WIDTH/2 + (Math.random()-0.5)*200;
     var yCoord = HEIGHT/2 + (Math.random()-0.5)*200;
-    console.log(xCoord + ", " + yCoord);
 
     var type = "pawn";
 
@@ -401,7 +400,6 @@ function spawnEnemy(){
     }
     var newEnemy = new Enemy(xCoord, yCoord, type);
     enemies.push(newEnemy);    
-    console.log("Spawned " + enemies[enemies.length - 1].type);
 }
 
 function spawnBonus(){
