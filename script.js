@@ -49,7 +49,6 @@ var player = {
     targetHP: 100,                                                  // this slows down the animation, allowing the player to see HP change
     bulletCount: 12,
     enemiesDefeated: 0,
-    enemiesMissed: 0,
     level: 1,                                                       // level only goes up when the queen is killed
     powerUps: {
         berserk: {
@@ -168,14 +167,9 @@ function draw(){
         }
         
     } else {
-
-        var accuracy = Math.floor(player.enemiesDefeated/(player.enemiesDefeated + player.enemiesMissed)*10000)/100
-
-
         $("#again").show();
         text("Game Over", center.x, center.y-15, 40, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x, center.y+15, 20, "red", true);
-        text("Accuracy: " + accuracy + "%", center.x, center.y+45, 20, "red", true);
     }
 
 
@@ -267,13 +261,12 @@ function drawOpponents(){
                     hurtMP3.currentTime = 0;
                     hurtMP3.play();
                     player.targetHP -= enemy.damage;                          // this eases the animation
-                    player.enemiesMissed++;
                     rect(0,0, WIDTH, HEIGHT, "red");
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
                         player.enemiesDefeated++;                              // if the queen gets through, we still need to go up a level
-                        player.enemiesMissed++;
                         increaseLevel();
+
                     }
                 }
             }
