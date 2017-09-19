@@ -24,6 +24,8 @@ var center = {
 var animationSpeed = 50;
 var desiredAnimationSpeed = 50;
 
+var animationCycle;
+
 /* audio */
 
 var zapMP3 = new Audio('assets/zap.mp3');
@@ -43,28 +45,32 @@ var berserkCollectMP3 = new Audio('assets/berserkCollect.mp3');
 var queenSpawned = false;
 var enemySpawnRate = 0.01;
 var bonusSpawnRate = 0.005;
+var leaderboardUp = false;
 
-var player = {
-    hp: 100, 
-    targetHP: 100,                                                  // this slows down the animation, allowing the player to see HP change
-    bulletCount: 12,
-    enemiesDefeated: 0,
-    level: 1,                                                       // level only goes up when the queen is killed
-    powerUps: {
+var player;
+
+function Player(){
+    this.hp = 100;
+    this.targetHP = 100;                                                  // this slows down the animation, allowing the player to see HP change
+    this.bulletCount = 12;
+    this.enemiesDefeated = 0;
+    this.level = 1;                                                       // level only goes up when the queen is killed
+    this.isChampion = false;
+    this.powerUps = {
         berserk: {
-            count: 0,
-            active: false,
-            expires: Date. now()
+            count : 0,
+            active : false,
+            expires : Date. now()
         },
         shield: {
-            count: 0,
-            active: false,
-            expires: Date. now()
+            count : 0,
+            active : false,
+            expires : Date. now()
         },
         hyperspeed: {
-            count: 0,
-            active: false,
-            expires: Date. now()
+            count : 0,
+            active : false,
+            expires : Date. now()
         }
     }
 }
@@ -105,12 +111,21 @@ for(var i = 0; i < hyperspeed; i++) { bonusPot.push("hyperspeed") }
 
 // SETUP
 
+pause = true;
 init();                                                 // launch
 
 function init(){
 
-    pause = true;
     $("#again").hide();
+
+    queenSpawned = false;
+    leaderboardUp = false;
+
+    clearTimeout(animationCycle);
+
+
+
+    player = new Player();
 
     for(var i = 0; i < numStars; i++){
         createStar();
@@ -119,7 +134,7 @@ function init(){
 
     console.log("animationSpeed " + animationSpeed);
 
-    setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
+    animationCycle = setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
 
     // setTimeout(draw, animationSpeed);
 }
@@ -167,9 +182,20 @@ function draw(){
         }
         
     } else {
-        $("#again").show();
+        
+        
         text("Game Over", center.x, center.y-15, 40, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x, center.y+15, 20, "red", true);
+
+        if(isTopTen(tempLeaders, player.enemiesDefeated) && !leaderboardUp && !player.isChampion){
+            leaderboardUp = true;
+            console.log("made top 10!");
+            $("#leaderboard").show();
+            $("#add-leader").show();
+        } else if (!leaderboardUp) {
+            $("#again").show();
+        }
+        
     }
 
 
@@ -179,7 +205,7 @@ function draw(){
     if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
 
     if(!pause){
-        setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
+        animationCycle = setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
     }
     
 }
@@ -587,20 +613,21 @@ function Bonus(x, y, type){
     this.visible = true;
 }
 
+
 /* LISTENERS */
 
 $("#canvas").on("mousedown", function(e){
 //    console.log("[" + e.pageX + ", " + e.pageY + "]");
-    if(!pause){ shoot(e.pageX, e.pageY) }
+    if(!pause && player.hp > 0){ shoot(e.pageX, e.pageY) }
 });
 
 $("body").on("keydown", function(e){
-    if(e.which == 32){
+    if(e.which == 32 && player.hp > 0){
         if(!pause){ shoot(lastX, lastY) }
     }
 
     /* bonus key events */
-    if(!pause){
+    if(!pause && player.hp > 0){
         if(e.which == 65 || e.which == 222){         // 83 68 70        75 76 186
             console.log("berserk!");
             if(player.powerUps.berserk.count > 0){
@@ -633,7 +660,7 @@ $("body").on("keydown", function(e){
         }
     }
 
-    if(e.which == 80){
+    if(e.which == 80 && player.hp > 0){
         console.log(pause);
         if(pause){
             pause = false;
@@ -661,7 +688,34 @@ $("#start").on("click", function(){
 
 $("#again").on("click", function(){
     $(this).hide();
-    window.location.reload();
+    $("#leaderboard").hide();
+    init();
+});
+
+$("#close-leaderboard").on("click", function(){
+    $("#leaderboard").hide();
+    leaderboardUp = false;
+    if(player.health == 0) {
+        $("#again").show();
+    }
+    
+});
+
+$("#close-about").on("click", function(){
+    $("#about").hide();
+});
+
+$("#show-leaderboard").on("click", function(){
+    $("#leaderboard").show();
+    $("#about").hide();
+    leaderboardUp = true;
+    $("#again").hide();
+});
+
+$("#show-about").on("click", function(){
+    $("#about").show();
+    $("#leaderboard").hide();
+    leaderboardUp = true;
 });
 
 
@@ -735,4 +789,121 @@ function randBetween(min, max){
 function getDistance(x1, y1, x2, y2){
     return Math.sqrt(Math.pow((x1-x2),2) + Math.pow((y1-y2),2));
 }
+
+
+/* LEADERBOARD FUNCTIONS */
+
+
+
+
+var tempLeaders = [
+{
+    name: "max",
+    kills: 0,
+    level: 7
+}, {
+    name: "jon",
+    kills: 0,
+    level: 9
+}, {
+    name: "robby",
+    kills: 0,
+    level: 5
+}, {
+    name: "boobzz69",
+    kills: 0,
+    level: 7
+}, {
+    name: "lke",
+    kills: 0,
+    level: 6
+}, {
+    name: "maknfax",
+    kills: 0,
+    level: 4
+}, {
+    name: "k3jf",
+    kills: 0,
+    level: 3
+}, {
+    name: "rofatha",
+    kills: 0,
+    level: 3
+}, {
+    name: "saheed",
+    kills: 0,
+    level: 2
+}, {
+    name: "rachel",
+    kills: 0,
+    level: 1
+} ]
+
+
+function updateLeaderboardView(leaders){
+
+    $("#current-leaders").empty();
+
+    for(var i = 0; i < leaders.length; i++){
+        var leader = leaders[i];
+
+        var leaderDiv = "<div class = 'one-leader'><div class = 'rank'>" + (i+1) + ". </div><!-- --><div class = 'name'>" + leader.name + "</div><!-- --><div class = 'kills'>" + leader.kills +"</div><!-- --><div class = 'level'>" + leader.level + "</div></div>"
+        $("#current-leaders").append(leaderDiv);
+    }
+
+}
+
+function isTopTen(leaders, score) {
+
+
+
+    var result = false;
+
+    for(var i = 0; i < leaders.length; i++){
+        if(score > leaders[i].kills) { result = true }
+    }
+
+    return result;
+}
+
+function addToLeaderboard(leaders, newLeader){
+
+    $("#add-leader").hide();
+
+    var newPlace = 0;
+    var foundNewSpot = false;
+
+    for(var i = 0; i < leaders.length; i++){
+        if(newLeader.kills > leaders[i].kills && !foundNewSpot) { 
+            foundNewSpot = true;
+            newPlace = i;
+        }
+    }
+
+    leaders.splice(newPlace, 0, newLeader);          // add new leader in...
+    leaders.pop();                                   // remove last element
+
+    player.isChampion = true;
+
+    console.log("leaders:");
+    console.log(leaders);
+
+}
+
+
+$("#add").on("click", function(){
+    var text = $("#new-leader-name").val().trim()
+    if(text){
+        console.log("adding: " + text);
+        
+        var newLeader = {
+            name: text,
+            kills: player.enemiesDefeated,
+            level: player.level
+        }
+
+        addToLeaderboard(tempLeaders, newLeader);
+        updateLeaderboardView(tempLeaders);
+    }
+});
 

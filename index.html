@@ -12,7 +12,7 @@
 
     <canvas id = "canvas"></canvas>
 
-    <div id = "intro">
+    <div class = "popup" id = "intro">
         <div id = "description">
             <div class = "game-intro">
                     Get ready to shoot up flesh-eating space squares! They have stumbled into your corner of the cosmos, and they're not leaving without a fight. Every enemy that makes it past your guard will feast on your health, and watch out - among their ranks are vicious Queen squares ready to take a chomp out of your spacesuit. 
@@ -58,10 +58,53 @@
             </div>
         </div>
         <button id = "start">Play</button>
+        <div id = "footer">
+            <a id = "show-leaderboard">Leaderboard</a>
+            <a id = "show-about">About</a>
+        </div>
+    </div>
+
+    <div class = "popup" id = "leaderboard">
+        <div class = "close-header"><span class = "close-icon" id = "close-leaderboard">&#8855;</span></div>
+        <div id = "leaderboard-title">Leaderboard</div>
+        <div class = "one-leader">
+            <div class = "rank leaderboard-header">#</div><!-- 
+         --><div class = "name leaderboard-header">Name</div><!--
+         --><div class = "kills leaderboard-header">Kills</div><!-- 
+         --><div class = "level leaderboard-header">Level</div>
+        </div>
+        <div id = "current-leaders">
+        </div>
+        <div id = "add-leader">
+            <input type = "text" maxlength="15" id = "new-leader-name" placeholder="Your name, spaceman"></input>
+            <button id = "add">Add</button>
+        </div>
+    </div>
+
+    <div class = "popup" id = "about">
+        <div class = "close-header"><span class = "close-icon" id = "close-about">&#8855;</span></div>
+        <p>Code and music written by <a href = "http://maximpekarsky.com" target = "_blank"> Maxim Pekarsky</a>. Project built with HTML canvas and JS with jQuery. Data hosted with Google Firebase.</p>
     </div>
 
     <button id = "again">Try Again</button>
     
+    <!-- Alright, let's try this Firebase contraption all this kids are talking about -->
+
+    <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBPYHEniQ2IqNbCwkPQvETSXS6P_v8qrJg",
+        authDomain: "spcsqrs.firebaseapp.com",
+        databaseURL: "https://spcsqrs.firebaseio.com",
+        projectId: "spcsqrs",
+        storageBucket: "spcsqrs.appspot.com",
+        messagingSenderId: "149533187641"
+      };
+      firebase.initializeApp(config);
+    </script>
+
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src = "script.js"></script>
 </body>

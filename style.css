@@ -7,6 +7,16 @@ body {
     font-family: 'Rajdhani', sans-serif;
 }
 
+a {
+    color: #00D010;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #27BCF3;
+    text-decoration: none;
+}
+
 #canvas {
 	width: 100vw;
 	height: 100vh;
@@ -17,7 +27,8 @@ body {
 	cursor: crosshair;
 }
 
-#intro {
+
+.popup {
     width: 800px;
     background: rgba(40, 40, 40, 0.8);
 	z-index: 2;
@@ -28,7 +39,6 @@ body {
     color: #DEEEDB;
     box-shadow: 0px 0px 25px rgba(128, 128, 128, 0.75);
     border-radius: 15px;  
-
 }
 
 #description {
@@ -37,22 +47,33 @@ body {
     height: 75%;
 }
 
-#start, #again {
+input {
+    display: block;
+    width: 90%;
+    font-size: 2em;
+    font-family: 'Rajdhani', sans-serif;
+    margin: 20px auto;
+    border: 1px solid gray;
+    box-shadow: 0px 0px 3px gray;
+}
+
+button {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
     border: 2px solid white;
-    margin: 10px;
+    margin: 10px auto;
     padding: 10px;
     background-color: black;
     color: white;
     text-transform: uppercase;
     font-size: 2.5em;
     position: relative;
-    left: 50%;
-    transform: translateX(-50%);
+    display: block;
+    text-align: center;
+
 }
 
-#start:hover, #again:hover {
+button:hover {
     background-color: #F1F1F1;
     border: 2px solid black;
     color: black;
@@ -143,7 +164,93 @@ body {
 
 #again {
     position: absolute;
-    bottom: 20%;
+    bottom: 15%;
     left: 50%;
     transform: translateX(-50%);
 }
+
+
+
+#leaderboard, #about {
+    background: rgba(40, 40, 40, 0.9);
+    width: 400px;
+    color: #d6e8a2;
+    z-index: 5;
+    min-height: 200px;
+    display: none;
+}
+
+#about {
+    font-size: 1em;
+    min-height: 10px;
+}
+
+#about p {
+    padding: 0px 10px;
+}
+
+.close-header{
+    height: 1.5em;
+    width: calc(100% - 10px);
+    padding: 0px 10px;
+}
+
+.close-icon{
+    float: right;
+    font-size: 2em;
+    margin-right: 10px;
+    color: #00D010;
+}
+.close-icon:hover{
+    color: #27BCF3;
+}
+
+#leaderboard-title {
+    font-weight: bold;
+    font-size: 3em;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.leaderboard-header{
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.one-leader {
+    width: 90%;
+    margin: 3px auto;
+    font-size: 1.2em;
+}
+
+.one-leader div {
+    display: inline-block;
+}
+
+.name {
+    width: 60%;
+}
+
+.rank {
+    width: 10%;
+}
+
+.kills, .level {
+    width: 15%;
+    text-align: center;
+}
+
+#add-leader {
+    display: none;
+}
+
+#footer {
+    float: right;
+    margin: 5px 5px 5px 0;
+}
+
+#footer a {
+    display: inline;
+    margin: 0px 5px;
+}
+
