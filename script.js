@@ -116,6 +116,8 @@ function init(){
     }
     console.log(stars);
 
+    console.log("animationSpeed " + animationSpeed);
+
     setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
 
     // setTimeout(draw, animationSpeed);
@@ -434,8 +436,6 @@ function spawnBonus(){
     console.log(type);
     var newBonus = new Bonus(xCoord, yCoord, type);
     bonuses.push(newBonus);    
-    console.log("spawning bonus");
-
 }
 
 
@@ -540,7 +540,6 @@ function checkForBonus(x, y){
                     player.powerUps.hyperspeed.count++;
                 }
             
-                console.log(bonus.type);
             }
         }
     }
