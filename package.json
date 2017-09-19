@@ -1,0 +1,27 @@
+{
+  "name": "spacesquares",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maximforever/starfield.git"
+  },
+  "author": "Max Pekarsky",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maximforever/starfield/issues"
+  },
+  "homepage": "https://github.com/maximforever/starfield#readme",
+  "dependencies": {
+    "body-parser": "^1.18.1",
+    "ejs": "^2.5.7",
+    "express": "^4.15.4",
+    "mongo": "^0.1.0",
+    "nodemon": "^1.12.1"
+  }
+}
