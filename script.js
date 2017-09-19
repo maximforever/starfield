@@ -127,9 +127,12 @@ function init(){
 
     player = new Player();
 
-    for(var i = 0; i < numStars; i++){
-        createStar();
+    if(stars.length == 0 ){
+        for(var i = 0; i < numStars; i++){
+            createStar();
+        }
     }
+
     console.log(stars);
 
     console.log("animationSpeed " + animationSpeed);
@@ -462,7 +465,6 @@ function spawnBonus(){
     var xCoord = WIDTH/2 + (Math.random()-0.5)*100;
     var yCoord = HEIGHT/2 + (Math.random()-0.5)*100;
     var type = bonusPot[Math.floor(Math.random()*bonusPot.length)];
-    console.log(type);
     var newBonus = new Bonus(xCoord, yCoord, type);
     bonuses.push(newBonus);    
 }
@@ -695,9 +697,9 @@ $("#again").on("click", function(){
 $("#close-leaderboard").on("click", function(){
     $("#leaderboard").hide();
     leaderboardUp = false;
-    if(player.health == 0) {
-        $("#again").show();
-    }
+    if(player.health == 0) { $("#again").show() }
+    if(!player.isChampion) { player.isChampion = true }
+
     
 });
 
