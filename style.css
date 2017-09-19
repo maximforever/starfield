@@ -26,7 +26,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     color: #DEEEDB;
-    box-shadow: 0px 0px 45px rgba(128, 128, 128, 0.75);
+    box-shadow: 0px 0px 25px rgba(128, 128, 128, 0.75);
     border-radius: 15px;  
 
 }
@@ -37,7 +37,7 @@ body {
     height: 75%;
 }
 
-#start {
+#start, #again {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
     border: 2px solid white;
@@ -52,7 +52,7 @@ body {
     transform: translateX(-50%);
 }
 
-#start:hover {
+#start:hover, #again:hover {
     background-color: #F1F1F1;
     border: 2px solid black;
     color: black;
@@ -106,7 +106,7 @@ body {
 }
 
 .game-intro {
-    padding: 0px 10px 10px 10px;
+    padding: 10px;
     font-size: 1.1em;
     line-height: 1.3em;
 }
@@ -139,4 +139,11 @@ body {
 
 .bold {
     font-weight: bold;
+}
+
+#again {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
 }

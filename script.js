@@ -110,6 +110,7 @@ init();                                                 // launch
 function init(){
 
     pause = true;
+    $("#again").hide();
 
     for(var i = 0; i < numStars; i++){
         createStar();
@@ -166,8 +167,9 @@ function draw(){
         }
         
     } else {
-        text("Game Over", center.x-15, center.y-15, 30, "red", true)
-        text("Enemies killed: " + player.enemiesDefeated, center.x-15, center.y+30, 15, "red", true);
+        $("#again").show();
+        text("Game Over", center.x, center.y-15, 40, "red", true)
+        text("Enemies killed: " + player.enemiesDefeated, center.x, center.y+15, 20, "red", true);
     }
 
 
@@ -378,7 +380,7 @@ function drawHealthBar(){
 
 function drawStatusWindow(){
 
-    rect(20, 60, 200, 100, "rgba(230, 230, 230, 0.7)");
+    rect(20, 60, 200, 60, "rgba(230, 230, 230, 0.7)");
     text("Enemies killed: " + player.enemiesDefeated, 30, 85, 18, "black", false);
     text("Level: " + player.level, 30, 105, 18, "black", false);
 
@@ -386,17 +388,18 @@ function drawStatusWindow(){
 
 function drawBonusWindow(){
 
-    rect(20, 180, 200, 100, "rgba(230, 230, 230, 0.7)");
-    text("Berserk", 30, 200, 18, "black", false);
-    text("[A] or [']", 160, 200, 15, "black", false);
+    rect(20, 140, 200, 100, "rgba(230, 230, 230, 0.7)");
+
+    text("Berserk", 30, 165, 18, "black", false);
+    text("[A] or [']", 160, 165, 15, "black", false);
     for(var i = 0; i < player.powerUps.berserk.count; i++){
-        circle((35+15*i), 215, 5, "#6C1F7F", true);
+        circle((35+15*i), 180, 5, "#6C1F7F", true);
     }
 
-    text("Hyperspeed", 30, 240, 18, "black", false);
-    text("[S] or [;]", 160, 240, 15, "black", false);
+    text("Hyperspeed", 30, 205, 18, "black", false);
+    text("[S] or [;]", 160, 205, 15, "black", false);
     for(var i = 0; i < player.powerUps.hyperspeed.count; i++){
-        circle((35+15*i), 255, 5, "#DEDE00", true);
+        circle((35+15*i), 220, 5, "#DEDE00", true);
     }
  
 }
@@ -654,6 +657,11 @@ $("#start").on("click", function(){
     pause = false;
     $("#intro").hide();
     draw();
+});
+
+$("#again").on("click", function(){
+    $(this).hide();
+    window.location.reload();
 });
 
 
