@@ -152,10 +152,10 @@ var enemyData = {
 
 var bonusPot = [];
 var berserk = 25;
-var hp = 20;
+var hp = 15;
 var extraBullets = 45;
 var hyperspeed = 10;
-var shield = 100;
+var shield = 5;
 
 for(var i = 0; i < berserk; i++) { bonusPot.push("berserk") }
 for(var i = 0; i < hp; i++) { bonusPot.push("hp") }
