@@ -93,15 +93,15 @@ var berserkCollectMP3 = new Audio('assets/berserkCollect.mp3');
 
 
 var queenSpawned = false;
-var enemySpawnRate = 0.1;
+var enemySpawnRate = 0.01;
 var bonusSpawnRate = 0.005;
 var leaderboardUp = false;
 
 var player;
 
 function Player(){
-    this.hp = 10;
-    this.targetHP = 10;                                                  // this slows down the animation, allowing the player to see HP change
+    this.hp = 100;
+    this.targetHP = 100;                                                  // this slows down the animation, allowing the player to see HP change
     this.bulletCount = 12;
     this.enemiesDefeated = 0;
     this.enemiesMissed = 0;
