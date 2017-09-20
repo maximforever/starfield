@@ -38,14 +38,11 @@ function updateLeaderboard(leaderList){
     updateLeaderboardView();
 }
 
-function writeLastTopScore(score){
-    db.ref("score").set({
-        kills: score
-    });
+
+function recordGameResult(player){
+    var newGame = db.ref("games").push();
+    newGame.set(player);
 }
-
-
-
 
 
 var canvas = document.getElementById("canvas");
@@ -76,6 +73,9 @@ var desiredAnimationSpeed = 50;
 
 var animationCycle;
 
+var gameStart;
+var gameEnd;
+
 /* audio */
 
 var soundtrack = new Audio('assets/StarfieldDraft1.mp3');
@@ -83,14 +83,17 @@ var soundtrack = new Audio('assets/StarfieldDraft1.mp3');
 var zapMP3 = new Audio('assets/zap.mp3');
 var hitMP3 = new Audio('assets/hit1.mp3');
 var hurtMP3 = new Audio('assets/hit2.mp3');
+var thumpMP3 = new Audio('assets/thump.mp3');
+
 var hpMP3 = new Audio('assets/hp.mp3');
 var berserkMP3 = new Audio('assets/berserk.mp3');
-var bulletsMP3 = new Audio('assets/bullets.mp3');
 var hyperspeedMP3 = new Audio('assets/hyperspeed.mp3');
 var bulletsMP3 = new Audio('assets/bullets.mp3');
+var shieldMP3 = new Audio('assets/shield.mp3');
 
 var hyperCollectMP3 = new Audio('assets/hyperCollect.mp3');
 var berserkCollectMP3 = new Audio('assets/berserkCollect.mp3');
+var shieldCollectMP3 = new Audio('assets/shieldCollect.mp3');
 
 
 var queenSpawned = false;
@@ -152,11 +155,13 @@ var berserk = 25;
 var hp = 20;
 var extraBullets = 45;
 var hyperspeed = 10;
+var shield = 100;
 
 for(var i = 0; i < berserk; i++) { bonusPot.push("berserk") }
 for(var i = 0; i < hp; i++) { bonusPot.push("hp") }
 for(var i = 0; i < extraBullets; i++) { bonusPot.push("extraBullets") }
 for(var i = 0; i < hyperspeed; i++) { bonusPot.push("hyperspeed") }
+for(var i = 0; i < shield; i++) { bonusPot.push("shield") }
 
 
 
@@ -171,7 +176,7 @@ function init(){
     $("#again").hide();
 
     soundtrack.currentTime = 0;
-    soundtrack.play();
+    //soundtrack.play();
     soundtrack.loop = true;
 
     queenSpawned = false;
@@ -179,6 +184,8 @@ function init(){
     stars = [];
     enemies = [];
     bonuses = [];
+
+    gameStart = Date.now();
 
     clearTimeout(animationCycle);
 
@@ -227,6 +234,10 @@ function draw(){
        
         if(!pause){
             
+            if(player.powerUps.shield.active){
+                rect(0, 0, WIDTH, HEIGHT, "rgba(250, 247, 143, 0.2)")
+            }
+
             drawStatusWindow();
             drawBonusWindow();
 
@@ -255,8 +266,22 @@ function draw(){
         text("Game Over", center.x, center.y-15, 40, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x, center.y+15, 20, "red", true);
 
-        writeLastTopScore(player.enemiesDefeated);
+        var gameLength = Math.floor((Date.now() - gameStart)/1000);
 
+        var accuracyRating = Math.floor(player.enemiesDefeated/(player.enemiesDefeated + player.enemiesMissed)*10000)/100
+        var rightNow = Date();
+        var gameData = {
+            accuracy: accuracyRating,
+            kills: player.enemiesDefeated,
+            level: player.level,
+            length: gameLength,
+            date: rightNow
+        }
+
+        recordGameResult(gameData);
+
+        console.log("leaderboardUp: " + leaderboardUp);
+        console.log("player.isChampion: " + player.isChampion);
 
         if(!leaderboardUp && !player.isChampion){
             isTopTen(player.enemiesDefeated, function(result){
@@ -264,11 +289,9 @@ function draw(){
                     leaderboardUp = true;
                     console.log("made top 10!");
                     $("#leaderboard").show();
-
                     $("#add-leader").show();
                 } else if (!leaderboardUp) {
-                    clearTimeout(animationCycle);
-                    writeLastTopScore(player.enemiesDefeated);              // shouldn't need to do this twice, but it needs to be done!
+                    clearTimeout(animationCycle);             // shouldn't need to do this twice, but it needs to be done!
                     console.log("Not top ten, sorry!");
                     $("#again").show();
                 }
@@ -351,10 +374,21 @@ function drawOpponents(){
                 enemy.visible = false;
 
                 if(enemy.hp > 0){
-                    hurtMP3.currentTime = 0;
-                    hurtMP3.play();
-                    player.targetHP -= enemy.damage;                          // this eases the animation
-                    player.enemiesMissed++;
+
+                    if(player.powerUps.shield.active){
+                        thumpMP3.currentTime = 0;
+                        thumpMP3.play();
+                    } else {
+                        hurtMP3.currentTime = 0;
+                        hurtMP3.play();
+                    }
+
+                    if(!player.powerUps.shield.active){
+                        player.targetHP -= enemy.damage;                          // this eases the animation
+                        player.enemiesMissed++;
+                    }
+                    
+
                     rect(0,0, WIDTH, HEIGHT, "red");
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
@@ -398,6 +432,9 @@ function drawBonuses(){
                     break;
                 case "berserk":
                     color = "#6C1F7F";
+                    break;
+                case "shield":
+                    color = "#F34F4E";
                     break;
             }
 
@@ -482,7 +519,7 @@ function drawStatusWindow(){
 
 function drawBonusWindow(){
 
-    rect(20, 140, 200, 100, "rgba(230, 230, 230, 0.7)");
+    rect(20, 140, 200, 140, "rgba(230, 230, 230, 0.7)");
 
     text("Berserk", 30, 165, 18, "black", false);
     text("[A] or [']", 160, 165, 15, "black", false);
@@ -494,6 +531,12 @@ function drawBonusWindow(){
     text("[S] or [;]", 160, 205, 15, "black", false);
     for(var i = 0; i < player.powerUps.hyperspeed.count; i++){
         circle((35+15*i), 220, 5, "#DEDE00", true);
+    }
+
+    text("Shield", 30, 245, 18, "black", false);
+    text("[D] or [L]", 160, 245, 15, "black", false);
+    for(var i = 0; i < player.powerUps.shield.count; i++){
+        circle((35+15*i), 260, 5, "#F34F4E", true);
     }
  
 }
@@ -627,13 +670,14 @@ function checkForBonus(x, y){
                     berserkCollectMP3.currentTime = 0;
                     berserkCollectMP3.play();
                     player.powerUps.berserk.count++;                                // active for 15 seconds - stored for later use
-                } else if (bonus.type == "shield" ){
-                    player.powerUps.berserk.active = true;
-                    player.powerUps.berserk.expires = Date.now() + 15000;           // active for 15 seconds - stored for later use
                 } else if (bonus.type == "hyperspeed" && player.powerUps.hyperspeed.count < 10){
                     hyperCollectMP3.currentTime = 0;
                     hyperCollectMP3.play();
                     player.powerUps.hyperspeed.count++;
+                } else if (bonus.type == "shield" && player.powerUps.shield.count < 10){
+                    shieldCollectMP3.currentTime = 0;
+                    shieldCollectMP3.play();
+                    player.powerUps.shield.count++;
                 }
             
             }
@@ -725,6 +769,22 @@ $("body").on("keydown", function(e){
                 }
             }
         }
+
+        if(e.which == 68 || e.which == 76){         //  70        75 
+            console.log("shield!");
+            if(player.powerUps.shield.count > 0){
+                player.powerUps.shield.count--;
+                shieldMP3.currentTime = 0;
+                shieldMP3.play();
+                if(player.powerUps.shield.active){
+                    player.powerUps.shield.expires += 10000;
+                } else {
+                    player.powerUps.shield.active = true;
+                    player.powerUps.shield.expires = Date.now() + 10000;
+                }
+            }
+        }
+
     }
 
     if(e.which == 80 && player.hp > 0){
@@ -732,7 +792,7 @@ $("body").on("keydown", function(e){
         if(pause){
             pause = false;
             $("#intro").hide();
-            soundtrack.play();
+            //soundtrack.play();
             draw();
         } else {
             $("#intro").show();

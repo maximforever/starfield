@@ -88,10 +88,10 @@ button:hover {
 
 .bonus-tile {
     display: inline-block;
-    width: calc(25% - 10px);
+    width: calc(20% - 16px);
     vertical-align: top;
     text-align: center;
-    padding: 0px 5px;
+    padding: 0px 8px;
 }
 
 .bonus-pic{
@@ -124,6 +124,10 @@ button:hover {
 
 #bullets {
     background: #078CC7;
+}
+
+#shield {
+    background: #F34F4E;
 }
 
 .game-intro {

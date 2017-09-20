@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class = "game-intro">
-                Fortunately, you'll have some help from floating space debris along the way. Some power-ups are applied instantly (<span class = "bold">extra bullets</span> and <span class = "bold">HP</span>), but others (<span class = "bold">hyperspeed</span> and <span class = "bold">berserk</span>) are stored for whenever you're ready to use them. <span class = "bold">Hover</span> over power-ups to pick them up. 
+                Fortunately, you'll have some help from floating space debris along the way. Some power-ups are applied instantly (<span class = "bold">extra bullets</span> and <span class = "bold">HP</span>), but others (<span class = "bold">hyperspeed</span>, <span class = "bold">shield</span>, and <span class = "bold">berserk</span>) are stored for whenever you're ready to use them. <span class = "bold">Hover</span> over power-ups to pick them up. 
             </div>
             <div id = "bonuses">
                 <div class = "bonus-tile">
@@ -40,7 +40,7 @@
              --><div class = "bonus-tile">
                     <div class = "bonus-pic"><div class = "bonus-pic-div" id = "berserk"></div></div>
                     <div class = "description">
-                        <p><span class = "bold">Berserk</span>: for 15 seconds your bullets deal double damage</p>
+                        <p><span class = "bold">Berserk</span>: your bullets deal double damage (15 sec)</p>
                     </div>
                 </div><!-- 
              --><div class = "bonus-tile">
@@ -52,7 +52,13 @@
              --><div class = "bonus-tile">
                     <div class = "bonus-pic"><div class = "bonus-pic-div" id = "hyperspeed"></div></div>
                     <div class = "description">
-                        <p><span class = "bold">Hyperspeed</span>: for 15 seconds, you go fast, everything else goes slow</p>
+                        <p><span class = "bold">Hyperspeed</span>: you go fast, everything else goes slow (15 sec)</p>
+                    </div>
+                </div><!--
+             --><div class = "bonus-tile">
+                    <div class = "bonus-pic"><div class = "bonus-pic-div" id = "shield"></div></div>
+                    <div class = "description">
+                        <p><span class = "bold">Shield</span>: prevents any damage (10 sec)</p>
                     </div>
                 </div>
             </div>
@@ -92,19 +98,7 @@
     <!-- Alright, let's try this Firebase contraption all this kids are talking about -->
 
     <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
-    <script>
-      // Initialize Firebase
-      var config = {
-        apiKey: "AIzaSyBPYHEniQ2IqNbCwkPQvETSXS6P_v8qrJg",        // apparently, this is safe to do :\
-        authDomain: "spcsqrs.firebaseapp.com",
-        databaseURL: "https://spcsqrs.firebaseio.com",
-        projectId: "spcsqrs",
-        storageBucket: "spcsqrs.appspot.com",
-        messagingSenderId: "149533187641"
-      };
-      firebase.initializeApp(config);
-    </script>
-
+    <script src = "firebaseConfig.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.3.0/firebase-database.js"></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
