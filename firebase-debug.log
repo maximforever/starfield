@@ -1,0 +1,36 @@
+[debug] [2017-09-20T05:54:36.427Z] ----------------------------------------------------------------------
+[debug] [2017-09-20T05:54:36.430Z] Command:       /usr/local/Cellar/node/6.3.0/bin/node /usr/local/bin/firebase serve
+[debug] [2017-09-20T05:54:36.431Z] CLI Version:   3.12.0
+[debug] [2017-09-20T05:54:36.431Z] Platform:      darwin
+[debug] [2017-09-20T05:54:36.431Z] Node Version:  v6.3.0
+[debug] [2017-09-20T05:54:36.431Z] Time:          Wed Sep 20 2017 01:54:36 GMT-0400 (EDT)
+[debug] [2017-09-20T05:54:36.431Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2017-09-20T05:54:36.447Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2017-09-20T05:54:36.448Z] > authorizing via signed-in user
+[debug] [2017-09-20T05:54:36.450Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2017-09-20T05:54:36.451Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token { refresh_token: '1/K9E845v9_XnU7wEpml28DGm7Xfzbr5q9HPFl7e5ANww',
+  client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+  client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+  grant_type: 'refresh_token',
+  scope: 'email https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/firebase openid' } 
+ Wed Sep 20 2017 01:54:36 GMT-0400 (EDT)
+[debug] [2017-09-20T05:54:36.665Z] <<< HTTP RESPONSE 200
+[debug] [2017-09-20T05:54:36.668Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/spcsqrs  
+ Wed Sep 20 2017 01:54:36 GMT-0400 (EDT)
+[debug] [2017-09-20T05:54:37.409Z] <<< HTTP RESPONSE 200
+[debug] [2017-09-20T05:54:37.410Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/spcsqrs/tokens  
+ Wed Sep 20 2017 01:54:37 GMT-0400 (EDT)
+[debug] [2017-09-20T05:54:37.760Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from '/Users/maximpekarsky/Desktop/coding/starfield'...
+[info] 
+[debug] [2017-09-20T05:54:37.763Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/spcsqrs  
+ Wed Sep 20 2017 01:54:37 GMT-0400 (EDT)
+[debug] [2017-09-20T05:54:38.125Z] <<< HTTP RESPONSE 200
+[debug] [2017-09-20T05:54:38.126Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/149533187641/clients/_:getWebAppConfig  
+ Wed Sep 20 2017 01:54:38 GMT-0400 (EDT)
+[debug] [2017-09-20T05:54:38.626Z] <<< HTTP RESPONSE 200
+[info] i  hosting: Serving hosting files from: public
+[info] ✔  hosting: Local server: http://localhost:5000
+

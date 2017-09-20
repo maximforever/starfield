@@ -78,10 +78,11 @@ var animationCycle;
 
 /* audio */
 
+var soundtrack = new Audio('assets/StarfieldDraft1.mp3');
+
 var zapMP3 = new Audio('assets/zap.mp3');
 var hitMP3 = new Audio('assets/hit1.mp3');
 var hurtMP3 = new Audio('assets/hit2.mp3');
-
 var hpMP3 = new Audio('assets/hp.mp3');
 var berserkMP3 = new Audio('assets/berserk.mp3');
 var bulletsMP3 = new Audio('assets/bullets.mp3');
@@ -168,6 +169,10 @@ init();                                                 // launch
 function init(){
 
     $("#again").hide();
+
+    soundtrack.currentTime = 0;
+    soundtrack.play();
+    soundtrack.loop = true;
 
     queenSpawned = false;
     leaderboardUp = false;
@@ -727,10 +732,12 @@ $("body").on("keydown", function(e){
         if(pause){
             pause = false;
             $("#intro").hide();
+            soundtrack.play();
             draw();
         } else {
             $("#intro").show();
             pause = true;
+            soundtrack.pause();
         }
     } 
 
@@ -803,6 +810,11 @@ $("#add").on("click", function(){
         addToLeaderboard(newLeader);
     }
 });
+
+soundtrack.addEventListener('ended', function() {
+    this.currentTime = 0;
+    this.play();
+}, false);
 
 
 
