@@ -152,10 +152,10 @@ var enemyData = {
 
 var bonusPot = [];
 var berserk = 25;
-var hp = 15;
+var hp = 10;
 var extraBullets = 45;
 var hyperspeed = 10;
-var shield = 5;
+var shield = 10;
 
 for(var i = 0; i < berserk; i++) { bonusPot.push("berserk") }
 for(var i = 0; i < hp; i++) { bonusPot.push("hp") }
@@ -241,7 +241,7 @@ function draw(){
             drawStatusWindow();
             drawBonusWindow();
 
-            /* check for bonus expirtion */
+            /* check for bonus expiration */
 
             if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
                 player.powerUps.hyperspeed.active = false; 
@@ -251,6 +251,7 @@ function draw(){
             if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
 
         }
+
 
         if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
         if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
@@ -393,7 +394,7 @@ function drawOpponents(){
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
                         player.enemiesDefeated++;                              // if the queen gets through, we still need to go up a level
-                        increaseLevel();
+                        // increaseLevel();                                     // WHY?? ß
 
                     }
                 }
@@ -504,7 +505,7 @@ function drawHealthBar(){
     if(hyperWidth <= 0){ hyperWidth = 0 }
     if(berserkWidth <= 0){ berserkWidth = 0 }
 
-    if(player.powerUps.hyperspeed.active){ rect(20,  45, hyperWidth, 5, "black") }
+    if(player.powerUps.hyperspeed.active){ rect(20,  45, hyperWidth, 5, "#DEDE00") }
     if(player.powerUps.berserk.active){ rect((WIDTH - 20 - berserkWidth),  45, berserkWidth, 5, "#6C1F7F") }  
 
 }
