@@ -70,7 +70,8 @@
         <div class = "one-leader">
             <div class = "rank leaderboard-header">#</div><!-- 
          --><div class = "name leaderboard-header">Name</div><!--
-         --><div class = "kills leaderboard-header">Kills</div><!-- 
+         --><div class = "kills leaderboard-header">Kills</div><!--
+         --><div class = "accuracy leaderboard-header">Accuracy</div><!-- 
          --><div class = "level leaderboard-header">Level</div>
         </div>
         <div id = "current-leaders">
@@ -94,7 +95,7 @@
     <script>
       // Initialize Firebase
       var config = {
-        apiKey: "AIzaSyBPYHEniQ2IqNbCwkPQvETSXS6P_v8qrJg",
+        apiKey: "AIzaSyBPYHEniQ2IqNbCwkPQvETSXS6P_v8qrJg",        // apparently, this is safe to do :\
         authDomain: "spcsqrs.firebaseapp.com",
         databaseURL: "https://spcsqrs.firebaseio.com",
         projectId: "spcsqrs",
@@ -104,6 +105,7 @@
       firebase.initializeApp(config);
     </script>
 
+    <script src="https://www.gstatic.com/firebasejs/4.3.0/firebase-database.js"></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src = "script.js"></script>

@@ -170,23 +170,27 @@ button:hover {
 }
 
 
-
 #leaderboard, #about {
-    background: rgba(40, 40, 40, 0.9);
-    width: 400px;
+    background: rgba(40, 40, 40, 0.95);
+    width: 450px;
     color: #d6e8a2;
     z-index: 5;
     min-height: 200px;
     display: none;
 }
 
+#current-leaders{
+    margin-bottom: 10px;
+}
+
 #about {
-    font-size: 1em;
+    font-size: 1.2em;
     min-height: 10px;
 }
 
 #about p {
-    padding: 0px 10px;
+    padding: 20px;
+    margin: 0;
 }
 
 .close-header{
@@ -228,15 +232,20 @@ button:hover {
 }
 
 .name {
-    width: 60%;
+    width: 52%;
+}
+
+.accuracy {
+    width: 20%;
+    text-align: center;
 }
 
 .rank {
-    width: 10%;
+    width: 8%;
 }
 
 .kills, .level {
-    width: 15%;
+    width: 10%;
     text-align: center;
 }
 

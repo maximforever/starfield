@@ -1,3 +1,53 @@
+var db = firebase.database();                 // firebase database
+
+/* FIREBASE */
+writeLastLogin(Date());
+addToVisitorCount();
+
+function writeLastLogin(date) {
+    db.ref("login").set({
+        lastLogin: date
+    });
+}
+
+function addToVisitorCount(){
+    var numVisits;
+
+    db.ref("visitors").once('value').then(function(snapshot) {
+        numVisits = Number(snapshot.val().visitors);
+        numVisits++;
+        db.ref("visitors").set({
+            visitors: numVisits
+        });
+    });
+}
+
+function getLeaderboard(callback){
+    var leaders;
+
+    db.ref("leaderboard").once('value').then(function(snapshot) {
+        leaders = snapshot.val().leaders;
+        callback(leaders);
+    });
+}
+
+function updateLeaderboard(leaderList){
+    db.ref("leaderboard").set({
+        leaders: leaderList
+    });
+    updateLeaderboardView();
+}
+
+function writeLastTopScore(score){
+    db.ref("score").set({
+        kills: score
+    });
+}
+
+
+
+
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 
@@ -43,17 +93,18 @@ var berserkCollectMP3 = new Audio('assets/berserkCollect.mp3');
 
 
 var queenSpawned = false;
-var enemySpawnRate = 0.01;
+var enemySpawnRate = 0.1;
 var bonusSpawnRate = 0.005;
 var leaderboardUp = false;
 
 var player;
 
 function Player(){
-    this.hp = 100;
-    this.targetHP = 100;                                                  // this slows down the animation, allowing the player to see HP change
+    this.hp = 10;
+    this.targetHP = 10;                                                  // this slows down the animation, allowing the player to see HP change
     this.bulletCount = 12;
     this.enemiesDefeated = 0;
+    this.enemiesMissed = 0;
     this.level = 1;                                                       // level only goes up when the queen is killed
     this.isChampion = false;
     this.powerUps = {
@@ -120,10 +171,11 @@ function init(){
 
     queenSpawned = false;
     leaderboardUp = false;
+    stars = [];
+    enemies = [];
+    bonuses = [];
 
     clearTimeout(animationCycle);
-
-
 
     player = new Player();
 
@@ -183,34 +235,41 @@ function draw(){
             if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
 
         }
+
+        if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
+        if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
+
+        if(!pause){
+            animationCycle = setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
+        }
         
     } else {
         
+        clearTimeout(animationCycle);
         
         text("Game Over", center.x, center.y-15, 40, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x, center.y+15, 20, "red", true);
 
-        if(isTopTen(tempLeaders, player.enemiesDefeated) && !leaderboardUp && !player.isChampion){
-            leaderboardUp = true;
-            console.log("made top 10!");
-            $("#leaderboard").show();
-            $("#add-leader").show();
-        } else if (!leaderboardUp) {
-            $("#again").show();
-        }
-        
+        writeLastTopScore(player.enemiesDefeated);
+
+
+        if(!leaderboardUp && !player.isChampion){
+            isTopTen(player.enemiesDefeated, function(result){
+                if(result){
+                    leaderboardUp = true;
+                    console.log("made top 10!");
+                    $("#leaderboard").show();
+
+                    $("#add-leader").show();
+                } else if (!leaderboardUp) {
+                    clearTimeout(animationCycle);
+                    writeLastTopScore(player.enemiesDefeated);              // shouldn't need to do this twice, but it needs to be done!
+                    console.log("Not top ten, sorry!");
+                    $("#again").show();
+                }
+            })
+        } 
     }
-
-
-
-
-    if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
-    if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
-
-    if(!pause){
-        animationCycle = setTimeout(function(){ requestAnimationFrame(draw) }, animationSpeed);
-    }
-    
 }
 
 /* DRAWING FUNCTIONS */
@@ -290,6 +349,7 @@ function drawOpponents(){
                     hurtMP3.currentTime = 0;
                     hurtMP3.play();
                     player.targetHP -= enemy.damage;                          // this eases the animation
+                    player.enemiesMissed++;
                     rect(0,0, WIDTH, HEIGHT, "red");
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
@@ -689,17 +749,21 @@ $("#start").on("click", function(){
 });
 
 $("#again").on("click", function(){
+    console.log("RESTARTING!");
     $(this).hide();
     $("#leaderboard").hide();
     init();
 });
 
 $("#close-leaderboard").on("click", function(){
+    console.log("closing leaderboard! " + player.hp)
     $("#leaderboard").hide();
     leaderboardUp = false;
-    if(player.health == 0) { $("#again").show() }
+    if(player.hp <= 0) { 
+        console.log("should be showing the button to play again");
+        $("#again").show();
+    }
     if(!player.isChampion) { player.isChampion = true }
-
     
 });
 
@@ -708,6 +772,7 @@ $("#close-about").on("click", function(){
 });
 
 $("#show-leaderboard").on("click", function(){
+    updateLeaderboardView();
     $("#leaderboard").show();
     $("#about").hide();
     leaderboardUp = true;
@@ -720,8 +785,24 @@ $("#show-about").on("click", function(){
     leaderboardUp = true;
 });
 
+$("#add").on("click", function(){
+    var text = $("#new-leader-name").val().trim()
+    if(text){
+        console.log("adding: " + text);
+        
+        var accuracyRating = Math.floor(player.enemiesDefeated/(player.enemiesDefeated + player.enemiesMissed)*10000)/100
+        var rightNow = Date();
+        var newLeader = {
+            accuracy: accuracyRating,
+            kills: player.enemiesDefeated,
+            level: player.level,
+            name: text,
+            date: rightNow
+        }
 
-
+        addToLeaderboard(newLeader);
+    }
+});
 
 
 
@@ -795,117 +876,69 @@ function getDistance(x1, y1, x2, y2){
 
 /* LEADERBOARD FUNCTIONS */
 
-
-
-
-var tempLeaders = [
-{
-    name: "max",
-    kills: 0,
-    level: 7
-}, {
-    name: "jon",
-    kills: 0,
-    level: 9
-}, {
-    name: "robby",
-    kills: 0,
-    level: 5
-}, {
-    name: "boobzz69",
-    kills: 0,
-    level: 7
-}, {
-    name: "lke",
-    kills: 0,
-    level: 6
-}, {
-    name: "maknfax",
-    kills: 0,
-    level: 4
-}, {
-    name: "k3jf",
-    kills: 0,
-    level: 3
-}, {
-    name: "rofatha",
-    kills: 0,
-    level: 3
-}, {
-    name: "saheed",
-    kills: 0,
-    level: 2
-}, {
-    name: "rachel",
-    kills: 0,
-    level: 1
-} ]
-
-
-function updateLeaderboardView(leaders){
+function updateLeaderboardView(){
 
     $("#current-leaders").empty();
+    leaders = getLeaderboard(function(leaders){
 
-    for(var i = 0; i < leaders.length; i++){
-        var leader = leaders[i];
+        for(var i = 1; i < leaders.length; i++){
+            var leader = leaders[i];
 
-        var leaderDiv = "<div class = 'one-leader'><div class = 'rank'>" + (i+1) + ". </div><!-- --><div class = 'name'>" + leader.name + "</div><!-- --><div class = 'kills'>" + leader.kills +"</div><!-- --><div class = 'level'>" + leader.level + "</div></div>"
-        $("#current-leaders").append(leaderDiv);
-    }
-
+            var leaderDiv = "<div class = 'one-leader'><div class = 'rank'>" + i + ". </div><!-- --><div class = 'name'>" + leader.name + "</div><!-- --><div class = 'kills'>" + leader.kills +"</div><!-- --><div class = 'accuracy'>" + leader.accuracy + "%</div><!-- --><div class = 'level'>" + leader.level + "</div></div>"
+            $("#current-leaders").append(leaderDiv);
+        }
+    });
 }
 
-function isTopTen(leaders, score) {
+function isTopTen(score, callback) {
 
+    getLeaderboard(function(leaders){
+        console.log("GET TOP TEN");
+        console.log("leaders: ");
+        console.log(leaders)
 
+        var result = false;
 
-    var result = false;
+        for(var i = 1; i < leaders.length; i++){
+//            console.log("leaders[i].kills, " + leaders[i].kills + " vs score, " + score);
+            if(score > leaders[i].kills) { result = true }
+//                console.log("result: " + result);
+        }
 
-    for(var i = 0; i < leaders.length; i++){
-        if(score > leaders[i].kills) { result = true }
-    }
+        callback(result);
+    });
 
-    return result;
+    
 }
 
-function addToLeaderboard(leaders, newLeader){
+function addToLeaderboard(newLeader){
 
     $("#add-leader").hide();
 
-    var newPlace = 0;
+    var newPlace = 1;
     var foundNewSpot = false;
 
-    for(var i = 0; i < leaders.length; i++){
-        if(newLeader.kills > leaders[i].kills && !foundNewSpot) { 
-            foundNewSpot = true;
-            newPlace = i;
+    getLeaderboard(function(leaders){
+
+        for(var i = 1; i < leaders.length; i++){
+            if(newLeader.kills > leaders[i].kills && !foundNewSpot) { 
+                foundNewSpot = true;
+                newPlace = i;
+            }
         }
-    }
 
-    leaders.splice(newPlace, 0, newLeader);          // add new leader in...
-    leaders.pop();                                   // remove last element
+        for(var j = (leaders.length-1); j > newPlace; j--){
+            leaders[j] = leaders[j-1];
+        }
 
-    player.isChampion = true;
+        leaders[newPlace] = newLeader;
 
-    console.log("leaders:");
-    console.log(leaders);
+        player.isChampion = true;
+
+        updateLeaderboard(leaders);
+
+    })
 
 }
 
-
-$("#add").on("click", function(){
-    var text = $("#new-leader-name").val().trim()
-    if(text){
-        console.log("adding: " + text);
-        
-        var newLeader = {
-            name: text,
-            kills: player.enemiesDefeated,
-            level: player.level
-        }
-
-        addToLeaderboard(tempLeaders, newLeader);
-        updateLeaderboardView(tempLeaders);
-    }
-});
 
