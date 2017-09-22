@@ -68,8 +68,8 @@ var center = {
     y: HEIGHT/2
 }
 
-var animationSpeed = 10;
-var desiredAnimationSpeed = 10;
+var animationSpeed = 50;
+var desiredAnimationSpeed = 50;
 
 var animationCycle;
 
