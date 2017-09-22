@@ -176,7 +176,7 @@ function init(){
     $("#again").hide();
 
     soundtrack.currentTime = 0;
-    //soundtrack.play();
+    soundtrack.play();
     soundtrack.loop = true;
 
     queenSpawned = false;
@@ -793,7 +793,7 @@ $("body").on("keydown", function(e){
         if(pause){
             pause = false;
             $("#intro").hide();
-            //soundtrack.play();
+            soundtrack.play();
             draw();
         } else {
             $("#intro").show();
@@ -994,9 +994,15 @@ function addToLeaderboard(newLeader){
     getLeaderboard(function(leaders){
 
         for(var i = 1; i < leaders.length; i++){
-            if(newLeader.kills > leaders[i].kills && !foundNewSpot) { 
-                foundNewSpot = true;
-                newPlace = i;
+            if(newLeader.kills >= leaders[i].kills && !foundNewSpot) { 
+                if(newLeader.kills == leaders[i].kills && newLeader.accuracy > leaders[i].accuracy){
+                    foundNewSpot = true;
+                    newPlace = i;        
+                } else {
+                    foundNewSpot = true;
+                    newPlace = i; 
+                }
+
             }
         }
 
@@ -1012,6 +1018,23 @@ function addToLeaderboard(newLeader){
 
     })
 
+}
+
+
+function sortLeaderboard(leaders){
+
+    sorted = false;
+
+    while(!sorted){
+        for(var i = 1; i < 11; i++){
+            // i have no idea how to do this lol
+
+
+
+        }
+    }
+
+    return leaders;
 }
 
 
