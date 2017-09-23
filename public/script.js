@@ -129,13 +129,8 @@ function init(){
 
     $("#again").hide();
 
-<<<<<<< HEAD
-    soundtrack.currentTime = 0;
-    // soundtrack.play();
-=======
     soundtrack.currentTime = 0;                         // reset the soundtrack, but don't play it yet.
 
->>>>>>> 6902e672988ba2992ee559c9df639619a97880d9
     soundtrack.loop = true;
 
     queenSpawned = false;
@@ -768,13 +763,11 @@ $("body").on("keydown", function(e){
         if(pause){
             pause = false;
             $("#intro").hide();
-<<<<<<< HEAD
-            // soundtrack.play();
-=======
+
             $("#leaderboard").hide();
             $("#about").hide();
-            soundtrack.play();
->>>>>>> 6902e672988ba2992ee559c9df639619a97880d9
+            // soundtrack.play();
+
             draw();
         } else {
             $("#intro").show();
@@ -1022,7 +1015,6 @@ function writeLastLogin(date) {
 function addToVisitorCount(){
     var numVisits;
 
-<<<<<<< HEAD
     db.ref("visitors").once('value').then(function(snapshot) {
         numVisits = Number(snapshot.val().visitors);
         numVisits++;
@@ -1145,9 +1137,6 @@ var level1 = {
 function Spawn(time){
     this.timestamp = time;
 }
-=======
-
->>>>>>> 6902e672988ba2992ee559c9df639619a97880d9
 
 new Spawn()
 
