@@ -129,8 +129,13 @@ function init(){
 
     $("#again").hide();
 
+<<<<<<< HEAD
     soundtrack.currentTime = 0;
     // soundtrack.play();
+=======
+    soundtrack.currentTime = 0;                         // reset the soundtrack, but don't play it yet.
+
+>>>>>>> 6902e672988ba2992ee559c9df639619a97880d9
     soundtrack.loop = true;
 
     queenSpawned = false;
@@ -242,6 +247,8 @@ function draw(){
     } else {
         
         clearTimeout(animationCycle);
+        soundtrack.pause();
+
         
         text("Game Over", center.x, center.y-15, 40, "red", true)
         text("Enemies killed: " + player.enemiesDefeated, center.x, center.y+15, 20, "red", true);
@@ -263,13 +270,16 @@ function draw(){
         console.log("leaderboardUp: " + leaderboardUp);
         console.log("player.isChampion: " + player.isChampion);
 
-        if(!leaderboardUp && !player.isChampion){
-            isTopTen(player.enemiesDefeated, function(result){
+        if(!player.isChampion){
+            isTopTen(gameData.kills, gameData.accuracy, function(result){
                 if(result){
                     leaderboardUp = true;
                     console.log("made top 10!");
-                    $("#leaderboard").show();
-                    $("#add-leader").show();
+                    getLeaderboard(function(){
+                        $("#leaderboard").show();
+                        $("#total-kills").text(player.enemiesDefeated);
+                        $("#add-leader").show();
+                    });
                 } else if (!leaderboardUp) {
                     clearTimeout(animationCycle);             // shouldn't need to do this twice, but it needs to be done!
                     console.log("Not top ten, sorry!");
@@ -363,19 +373,15 @@ function drawOpponents(){
                     } else {
                         hurtMP3.currentTime = 0;
                         hurtMP3.play();
-                    }
-
-                    if(!player.powerUps.shield.active){
                         player.targetHP -= enemy.damage;                          // this eases the animation
                         player.enemiesMissed++;
+                        rect(0,0, WIDTH, HEIGHT, "red");
                     }
-                    
 
-                    rect(0,0, WIDTH, HEIGHT, "red");
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
                         player.enemiesDefeated++;                              // if the queen gets through, we still need to go up a level
-                        // increaseLevel();                                     // WHY?? ß
+                        // increaseLevel();                                     // WHY?? 
 
                     }
                 }
@@ -577,7 +583,7 @@ function shoot(x, y){
             if(enemy.visible){
 
                 if(getDistance(x, y, enemy.x, enemy.y) <= enemy.size){
-                    console.log("HIT!");
+                    // console.log("HIT!");
                     rect(enemy.x, enemy.y, enemy.size, enemy.size, "yellow");
 
                     if(player.powerUps.berserk.active){
@@ -757,12 +763,18 @@ $("body").on("keydown", function(e){
 
     }
 
-    if(e.which == 80 && player.hp > 0){
+    if((e.which == 80 || e.which == 27) && player.hp > 0){
         console.log(pause);
         if(pause){
             pause = false;
             $("#intro").hide();
+<<<<<<< HEAD
             // soundtrack.play();
+=======
+            $("#leaderboard").hide();
+            $("#about").hide();
+            soundtrack.play();
+>>>>>>> 6902e672988ba2992ee559c9df639619a97880d9
             draw();
         } else {
             $("#intro").show();
@@ -782,6 +794,7 @@ $("#canvas").on("mousemove", function(e){
 $("#start").on("click", function(){
     pause = false;
     $("#intro").hide();
+    soundtrack.play();
     draw();
 });
 
@@ -932,7 +945,9 @@ function updateLeaderboardView(){
     });
 }
 
-function isTopTen(score, callback) {
+function isTopTen(score, accuracy, callback) {
+
+    console.log(score + ", " + accuracy);
 
     getLeaderboard(function(leaders){
         console.log("GET TOP TEN");
@@ -942,8 +957,13 @@ function isTopTen(score, callback) {
         var result = false;
 
         for(var i = 1; i < leaders.length; i++){
-//            console.log("leaders[i].kills, " + leaders[i].kills + " vs score, " + score);
-            if(score > leaders[i].kills) { result = true }
+            if(score >= leaders[i].kills) {
+                if(score > leaders[i].kills){
+                    result = true;
+                } else if(score == leaders[i].kills && accuracy > leaders[i].accuracy){
+                    result = true;
+                }
+            }
 //                console.log("result: " + result);
         }
 
@@ -967,7 +987,7 @@ function addToLeaderboard(newLeader){
                 if(newLeader.kills == leaders[i].kills && newLeader.accuracy > leaders[i].accuracy){
                     foundNewSpot = true;
                     newPlace = i;        
-                } else {
+                } else if(newLeader.kills > leaders[i].kills) {
                     foundNewSpot = true;
                     newPlace = i; 
                 }
@@ -1002,6 +1022,7 @@ function writeLastLogin(date) {
 function addToVisitorCount(){
     var numVisits;
 
+<<<<<<< HEAD
     db.ref("visitors").once('value').then(function(snapshot) {
         numVisits = Number(snapshot.val().visitors);
         numVisits++;
@@ -1124,6 +1145,9 @@ var level1 = {
 function Spawn(time){
     this.timestamp = time;
 }
+=======
+
+>>>>>>> 6902e672988ba2992ee559c9df639619a97880d9
 
 new Spawn()
 
