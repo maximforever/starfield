@@ -28,6 +28,8 @@ var desiredAnimationSpeed = 50;
 var animationCycle;
 var frame = 0;
 
+var currentLevel;
+
 var gameStart;
 
 /* audio */
@@ -140,6 +142,8 @@ function init(){
     bonuses = [];
     frame = 0;
 
+    currentLevel = "level1";
+
     gameStart = Date.now();
 
     clearTimeout(animationCycle);
@@ -197,7 +201,7 @@ function draw(){
             drawBonusWindow();
 
             // spawn opponents and bonuses randomly
-/*
+
             if(Math.random() < enemySpawnRate && !queenSpawned){
 
                     var type = "pawn";
@@ -207,19 +211,21 @@ function draw(){
                     }
 
                     spawnEnemy(type);
-            }*/
+            }
 
-            levelStep(level1);
+            // use level files to generate enemies at specific times
+/*
+            levelStep(currentLevel);               
 
             if(Math.random() < bonusSpawnRate){
                     spawnBonus();
             }
 
             // draw and update frame
-            text(frame, (WIDTH - 80), 80, 40, "blue", false);
+            text(frame + " (" + currentLevel[currentLevel.length-1] + ")", (WIDTH - 120), 80, 40, "blue", false);
             frame++;
 
-
+*/ 
             /* check for bonus expiration */
 
             if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
@@ -787,7 +793,7 @@ $("#canvas").on("mousemove", function(e){
 $("#start").on("click", function(){
     pause = false;
     $("#intro").hide();
-    soundtrack.play();
+    // soundtrack.play();
     draw();
 });
 
@@ -1047,12 +1053,14 @@ function recordGameResult(player){
 }
 
 
-/* test level */
+/* test levels */
 
 
 var enemyCounter = 0;
 
 function levelStep(level){
+
+    level = eval(level);
 
     if(level.enemies[enemyCounter].time == frame){
         console.log(level.enemies[enemyCounter].type);
@@ -1060,13 +1068,51 @@ function levelStep(level){
 
         if(enemyCounter + 1 < level.enemies.length){
             enemyCounter++;
+        } else {
+            enemyCounter = 0;
+            frame = 0;
+            var currentLevelNum = parseInt(currentLevel[currentLevel.length-1]);
+            currentLevel = "level" + (currentLevelNum+1);
         }
     }
 }
 
 
-
 var level1 = {
+    number: 1, 
+    background: "black",
+    enemies: [
+        {
+            time: 60,
+            type: "pawn"
+        },
+        {
+            time: 120,
+            type: "pawn"
+        },
+        {
+            time: 200,
+            type: "pawn"
+        },
+        {
+            time: 220,
+            type: "pawn"
+        },
+        {
+            time: 320,
+            type: "pawn"
+        },
+        {
+            time: 330,
+            type: "pawn"
+        },
+        {
+            time: 420,
+            type: "queen"
+        }]
+}
+
+var level2 = {
     number: 1, 
     background: "black",
     enemies: [
@@ -1091,7 +1137,7 @@ var level1 = {
             type: "pawn"
         },
         {
-            time: 150,
+            time: 180,
             type: "pawn"
         },
         {
@@ -1131,12 +1177,3 @@ var level1 = {
             type: "queen"
         }]
 }
-
-
-
-function Spawn(time){
-    this.timestamp = time;
-}
-
-new Spawn()
-
