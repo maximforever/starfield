@@ -53,9 +53,17 @@ var shieldCollectMP3 = new Audio('assets/shieldCollect.mp3');
 
 
 var queenSpawned = false;
-var enemySpawnRate = 0.01;
-var bonusSpawnRate = 0.005;
+var enemySpawnRate = 0.01;      // should be 0.01
+var bonusSpawnRate = 0.005;     // should be 0.005
 var leaderboardUp = false;
+
+var hyperspeedColor = [];
+var hyperspeedColorRGB = [];
+var colorCounter = Math.floor(Math.random()*3);
+var colorAverage;
+var colorSign = -1;
+
+
 
 var player;
 
@@ -79,7 +87,7 @@ function Player(){
             expires : Date. now()
         },
         hyperspeed: {
-            count : 0,
+            count : 3,
             active : false,
             expires : Date. now()
         }
@@ -172,8 +180,22 @@ function draw(){
 
 
     if (player.powerUps.hyperspeed.active && player.hp > 0){
-        rect(0 ,0, WIDTH, HEIGHT, "rgb(" + Math.floor(Math.random()*255) + ", "  + Math.floor(Math.random()*255) + ", "  + Math.floor(Math.random()*255));             // draw background
-        rect(0 ,0, WIDTH, HEIGHT, "gray");             // draw background
+        rect(0 ,0, WIDTH, HEIGHT, "rgb(" + hyperspeedColorRGB[0] + ", " + hyperspeedColorRGB[1] + ", " + hyperspeedColorRGB[2] + ")"); 
+
+        if(Math.random() < 0.01){
+            colorCounter = Math.floor(Math.random()*3);
+        }
+
+        console.log(colorCounter +  ", " + hyperspeedColorRGB[colorCounter]);
+
+        if(hyperspeedColorRGB[colorCounter] > 4 && hyperspeedColorRGB[colorCounter] < 251){
+            hyperspeedColorRGB[colorCounter] += colorSign*2;
+        } else {
+            colorCounter = Math.floor(Math.random()*3);
+            if(Math.random() > 0.5) { colorSign *= -1 }
+        }
+
+    //    rect(0 ,0, WIDTH, HEIGHT, "gray");             // draw background
     } else {
         rect(0 ,0, WIDTH, HEIGHT, "black");             // draw background
     }
@@ -206,26 +228,29 @@ function draw(){
 
                     var type = "pawn";
 
-                    if(player.enemiesDefeated > 0 && player.enemiesDefeated%5 == 0){
+                    if(player.enemiesDefeated > 0 && player.enemiesDefeated%5 == 0 && !queenSpawned){
                         type = "queen"
                     }
 
                     spawnEnemy(type);
             }
 
+            text(animationSpeed, (WIDTH - 120), 80, 40, "blue", false);
+
             // use level files to generate enemies at specific times
 /*
             levelStep(currentLevel);               
+
+            // draw and update current frame 
+            text(frame + " (" + currentLevel[currentLevel.length-1] + ")", (WIDTH - 120), 80, 40, "blue", false);
+            frame++;
+
+*/ 
 
             if(Math.random() < bonusSpawnRate){
                     spawnBonus();
             }
 
-            // draw and update frame
-            text(frame + " (" + currentLevel[currentLevel.length-1] + ")", (WIDTH - 120), 80, 40, "blue", false);
-            frame++;
-
-*/ 
             /* check for bonus expiration */
 
             if(player.powerUps.hyperspeed.active && player.powerUps.hyperspeed.expires <= Date.now())   { 
@@ -236,7 +261,6 @@ function draw(){
             if(player.powerUps.berserk.active && player.powerUps.berserk.expires <= Date.now())   { player.powerUps.berserk.active = false }
 
         }
-
 
         if(desiredAnimationSpeed < animationSpeed) { animationSpeed -= 5 }
         if(desiredAnimationSpeed > animationSpeed) { animationSpeed += 2 }
@@ -315,10 +339,13 @@ function drawStarfield(){
 
         // draw star
 
-        var color = "rgba(250, 250, 250, ";
+        var color = "rgba(250, 250, 250, ";                             // we determine opacity based on star.z below
 
         if(player.powerUps.hyperspeed.active){
-            color = "rgba(20, 20, 20, ";
+    
+
+            color = colorAverage;
+        
         }
 
 
@@ -350,7 +377,6 @@ function drawOpponents(){
 
             rect(enemy.x, enemy.y, enemy.size, enemy.size, enemy.color);
 
-            console.log("enemy.type " + enemy.type);
 
             // health bar
             if(enemy.type == "queen"){
@@ -381,9 +407,7 @@ function drawOpponents(){
 
                     if(enemy.type == "queen") { 
                         queenSpawned = false;
-                        player.enemiesDefeated++;                              // if the queen gets through, we still need to go up a level
-                        // increaseLevel();                                     // WHY?? 
-
+                        player.enemiesDefeated++;                              
                     }
                 }
             }
@@ -561,6 +585,7 @@ function increaseLevel(){
     player.level++;
     bonusSpawnRate *= 1.1;
     enemySpawnRate *= 1.1;
+    if(desiredAnimationSpeed >= 20) { (desiredAnimationSpeed -=2) }
     console.log("new enemy rate: " + enemySpawnRate);
     console.log("new bonus rate: " + bonusSpawnRate);
 }
@@ -623,6 +648,23 @@ function shoot(x, y){
     } else {
         console.log("no bullets!");
     }
+}
+
+function setHyperspeedColor(){
+
+    hyperspeedColorRGB[0] = Math.floor(Math.random()*255);
+    hyperspeedColorRGB[1] = Math.floor(Math.random()*255);
+    hyperspeedColorRGB[2] = Math.floor(Math.random()*255);
+
+
+    if(hyperspeedColorRGB[0] > 230 || hyperspeedColorRGB[0] > 230 || hyperspeedColorRGB[0] > 230 || (hyperspeedColorRGB[0] + hyperspeedColorRGB[1] + hyperspeedColorRGB[2])/3 > 127.5){
+        colorAverage = "rgba(20, 20, 20,"
+    } else {
+        colorAverage = "rgba(250, 250, 250,"
+    }
+
+    hyperspeedColor = "rgb(" + hyperspeedColorRGB[0] + ", " + hyperspeedColorRGB[1] + ", " + hyperspeedColorRGB[2] + ")";
+
 }
 
 function checkForBonus(x, y){
@@ -743,6 +785,11 @@ $("body").on("keydown", function(e){
                     player.powerUps.hyperspeed.active = true;
                     player.powerUps.hyperspeed.expires = Date.now() + 15000;
                     desiredAnimationSpeed *= 2;
+
+                    setHyperspeedColor();
+
+                    console.log(hyperspeedColor);
+
                 }
             }
         }
@@ -765,7 +812,6 @@ $("body").on("keydown", function(e){
     }
 
     if((e.which == 80 || e.which == 27) && player.hp > 0){
-        console.log(pause);
         if(pause){
             pause = false;
             $("#intro").hide();
