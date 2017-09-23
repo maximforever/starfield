@@ -1,50 +1,5 @@
 var db = firebase.database();                 // firebase database
 
-/* FIREBASE */
-writeLastLogin(Date());
-addToVisitorCount();
-
-function writeLastLogin(date) {
-    db.ref("login").set({
-        lastLogin: date
-    });
-}
-
-function addToVisitorCount(){
-    var numVisits;
-
-    db.ref("visitors").once('value').then(function(snapshot) {
-        numVisits = Number(snapshot.val().visitors);
-        numVisits++;
-        db.ref("visitors").set({
-            visitors: numVisits
-        });
-    });
-}
-
-function getLeaderboard(callback){
-    var leaders;
-
-    db.ref("leaderboard").once('value').then(function(snapshot) {
-        leaders = snapshot.val().leaders;
-        callback(leaders);
-    });
-}
-
-function updateLeaderboard(leaderList){
-    db.ref("leaderboard").set({
-        leaders: leaderList
-    });
-    updateLeaderboardView();
-}
-
-
-function recordGameResult(player){
-    var newGame = db.ref("games").push();
-    newGame.set(player);
-}
-
-
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 
@@ -70,11 +25,10 @@ var center = {
 
 var animationSpeed = 50;
 var desiredAnimationSpeed = 50;
-
 var animationCycle;
+var frame = 0;
 
 var gameStart;
-var gameEnd;
 
 /* audio */
 
@@ -176,7 +130,7 @@ function init(){
     $("#again").hide();
 
     soundtrack.currentTime = 0;
-    soundtrack.play();
+    // soundtrack.play();
     soundtrack.loop = true;
 
     queenSpawned = false;
@@ -184,6 +138,7 @@ function init(){
     stars = [];
     enemies = [];
     bonuses = [];
+    frame = 0;
 
     gameStart = Date.now();
 
@@ -240,6 +195,30 @@ function draw(){
 
             drawStatusWindow();
             drawBonusWindow();
+
+            // spawn opponents and bonuses randomly
+/*
+            if(Math.random() < enemySpawnRate && !queenSpawned){
+
+                    var type = "pawn";
+
+                    if(player.enemiesDefeated > 0 && player.enemiesDefeated%5 == 0){
+                        type = "queen"
+                    }
+
+                    spawnEnemy(type);
+            }*/
+
+            levelStep(level1);
+
+            if(Math.random() < bonusSpawnRate){
+                    spawnBonus();
+            }
+
+            // draw and update frame
+            text(frame, (WIDTH - 80), 80, 40, "blue", false);
+            frame++;
+
 
             /* check for bonus expiration */
 
@@ -360,6 +339,8 @@ function drawOpponents(){
 
             rect(enemy.x, enemy.y, enemy.size, enemy.size, enemy.color);
 
+            console.log("enemy.type " + enemy.type);
+
             // health bar
             if(enemy.type == "queen"){
                 var fullQueenHP = enemyData.queen.hp;
@@ -465,14 +446,6 @@ function drawBullets(){
         circle((30+30*j), HEIGHT - 20, 6, color, true);
 
     }
-
-    if(Math.random() < enemySpawnRate && !queenSpawned){
-            spawnEnemy();
-    }
-
-    if(Math.random() < bonusSpawnRate){
-            spawnBonus();
-    }
 }
 
 function drawHealthBar(){
@@ -556,16 +529,12 @@ function createStar(){
     stars.push(newStar);    
 }
 
-function spawnEnemy(){
+function spawnEnemy(type){
     var xCoord = WIDTH/2 + (Math.random()-0.5)*200;
     var yCoord = HEIGHT/2 + (Math.random()-0.5)*200;
 
-    var type = "pawn";
-
-    if(player.enemiesDefeated > 0 && player.enemiesDefeated%5 == 0){
-        type = "queen"
-        queenSpawned = true;
-    }
+    if(type == "queen") { queenSpawned = true }
+    
     var newEnemy = new Enemy(xCoord, yCoord, type);
     enemies.push(newEnemy);    
 }
@@ -793,7 +762,7 @@ $("body").on("keydown", function(e){
         if(pause){
             pause = false;
             $("#intro").hide();
-            soundtrack.play();
+            // soundtrack.play();
             draw();
         } else {
             $("#intro").show();
@@ -1020,21 +989,141 @@ function addToLeaderboard(newLeader){
 
 }
 
+/* FIREBASE FUNCTIONS */
+writeLastLogin(Date());
+addToVisitorCount();
 
-function sortLeaderboard(leaders){
-
-    sorted = false;
-
-    while(!sorted){
-        for(var i = 1; i < 11; i++){
-            // i have no idea how to do this lol
-
-
-
-        }
-    }
-
-    return leaders;
+function writeLastLogin(date) {
+    db.ref("login").set({
+        lastLogin: date
+    });
 }
 
+function addToVisitorCount(){
+    var numVisits;
+
+    db.ref("visitors").once('value').then(function(snapshot) {
+        numVisits = Number(snapshot.val().visitors);
+        numVisits++;
+        db.ref("visitors").set({
+            visitors: numVisits
+        });
+    });
+}
+
+function getLeaderboard(callback){
+    var leaders;
+
+    db.ref("leaderboard").once('value').then(function(snapshot) {
+        leaders = snapshot.val().leaders;
+        callback(leaders);
+    });
+}
+
+function updateLeaderboard(leaderList){
+    db.ref("leaderboard").set({
+        leaders: leaderList
+    });
+    updateLeaderboardView();
+}
+
+
+function recordGameResult(player){
+    var newGame = db.ref("games").push();
+    newGame.set(player);
+}
+
+
+/* test level */
+
+
+var enemyCounter = 0;
+
+function levelStep(level){
+
+    if(level.enemies[enemyCounter].time == frame){
+        console.log(level.enemies[enemyCounter].type);
+        spawnEnemy(level.enemies[enemyCounter].type);
+
+        if(enemyCounter + 1 < level.enemies.length){
+            enemyCounter++;
+        }
+    }
+}
+
+
+
+var level1 = {
+    number: 1, 
+    background: "black",
+    enemies: [
+        {
+            time: 30,
+            type: "pawn"
+        },
+        {
+            time: 80,
+            type: "pawn"
+        },
+        {
+            time: 90,
+            type: "pawn"
+        },
+        {
+            time: 140,
+            type: "pawn"
+        },
+        {
+            time: 145,
+            type: "pawn"
+        },
+        {
+            time: 150,
+            type: "pawn"
+        },
+        {
+            time: 200,
+            type: "pawn"
+        },
+        {
+            time: 240,
+            type: "queen"
+        },
+        {
+            time: 300,
+            type: "pawn"
+        },
+        {
+            time: 310,
+            type: "pawn"
+        },
+        {
+            time: 340,
+            type: "pawn"
+        },
+        {
+            time: 345,
+            type: "pawn"
+        },
+        {
+            time: 350,
+            type: "pawn"
+        },
+        {
+            time: 400,
+            type: "queen"
+        },
+        {
+            time: 405,
+            type: "queen"
+        }]
+}
+
+
+
+function Spawn(time){
+    this.timestamp = time;
+}
+
+new Spawn()
 
